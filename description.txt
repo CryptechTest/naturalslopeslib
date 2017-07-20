@@ -1,0 +1,1 @@
+Add stair-like slopes for natural ground and make falling blocks erode and slide.

@@ -1,0 +1,249 @@
+--[[ Bounding boxes
+Even with a slope model, we use a stair bounding box because it is less costly
+and is more bugproof that a precise box (sometime the player get stuck while trying
+to climb the slope).
+Moreover it can be sufficient.
+--]]
+
+local slope_straight_box = {
+	type = "fixed",
+	fixed = {
+		{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+		{-0.5, 0, 0, 0.5, 0.5, 0.5},
+	},
+}
+local slope_inner_corner_box = {
+	type = "fixed",
+	fixed = {
+		{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+		{-0.5, 0, 0, 0.5, 0.5, 0.5},
+		{-0.5, 0, -0.5, 0, 0.5, 0},
+	},
+}
+local slope_outer_corner_box = {
+	type = "fixed",
+	fixed = {
+		{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+		{-0.5, 0, 0, 0, 0.5, 0.5},
+	},
+}
+
+-- Place node upward or downward according to the pointer position inside the target
+local function rotate_and_place(itemstack, placer, pointed_thing)
+	if pointed_thing.type ~= "node" then
+		return itemstack
+	end
+	local p0 = pointed_thing.under
+	local p1 = pointed_thing.above
+	local param2 = 0
+
+	local placer_pos = placer:getpos()
+	if placer_pos then
+		param2 = minetest.dir_to_facedir(vector.subtract(p1, placer_pos))
+	end
+
+	local finepos = minetest.pointed_thing_to_face_pos(placer, pointed_thing)
+	local fpos = finepos.y % 1
+
+	if p0.y - 1 == p1.y or (fpos > 0 and fpos < 0.5)
+			or (fpos < -0.5 and fpos > -0.999999999) then
+		param2 = param2 + 20
+		if param2 == 21 then
+			param2 = 23
+		elseif param2 == 23 then
+			param2 = 21
+		end
+	end
+	return minetest.item_place(itemstack, placer, pointed_thing, param2)
+end
+
+--[[ Register a straight slope and recipe and so
+-- @param subname: The block will be registered as :slope:slope_<subname>
+-- @param recipeitem: The base item to use to build the slope
+-- @param groups: The groups that the slope node will have
+-- @param images:
+-- @param descriptions: Description of the new slope node
+-- @param sounds:
+--]]
+function natural_slopes.register_slope_straight(subname, recipeitem, groups, images, description, sounds)
+	local stair_images = {}
+	for i, image in ipairs(images) do
+		if type(image) == "string" then
+			stair_images[i] = {
+				name = image,
+				backface_culling = true,
+			}
+		elseif image.backface_culling == nil then -- override using any other value
+			stair_images[i] = table.copy(image)
+			stair_images[i].backface_culling = true
+		end
+	end
+	groups.stair = 1
+	groups.natural_slope = 1
+	local node_data = {
+		description = description,
+		drawtype = "mesh",
+		mesh = "twelve-twelve.obj",
+		tiles = stair_images,
+		paramtype = "light",
+		paramtype2 = "facedir",
+		is_ground_content = true,
+		groups = groups,
+		sounds = sounds,
+		selection_box = slope_straight_box,
+		collision_box = slope_straight_box,
+	}
+	if groups.falling_node == nil then
+		node_data.on_place = rotate_and_place
+	else
+		node_data.groups.falling_natural_slope = 1
+	end
+	local slope_name = natural_slopes.get_straight_slope_name(subname)
+	minetest.register_node(slope_name, node_data)
+	if recipeitem then
+		natural_slopes.straight_replacements[recipeitem] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+		-- Recipe matches appearence in inventory
+		minetest.register_craft({
+			output = slope_name .. ' 6',
+			recipe = {
+				{"", "", recipeitem},
+				{"", recipeitem, recipeitem},
+				{recipeitem, recipeitem, recipeitem},
+			},
+		})
+
+		-- Use stairs to craft full blocks again (1:1)
+		minetest.register_craft({
+			output = recipeitem .. ' 4',
+			recipe = {
+				{slope_name, slope_name},
+				{slope_name, slope_name},
+			},
+		})
+	end
+end
+
+--[[ Register an inner corner slope (see register_straight_slope for documentation) --]]
+function natural_slopes.register_slope_inner(subname, recipeitem, groups, images, description, sounds)
+	local stair_images = {}
+	for i, image in ipairs(images) do
+		if type(image) == "string" then
+			stair_images[i] = {
+				name = image,
+				backface_culling = true,
+			}
+		elseif image.backface_culling == nil then -- override using any other value
+			stair_images[i] = table.copy(image)
+			stair_images[i].backface_culling = true
+		end
+	end
+	groups.stair = 1
+	groups.natural_slope = 1
+	node_data = {
+		description = description .. " Inner",
+		drawtype = "mesh",
+		mesh = "twelve-twelve-ic.obj",
+		tiles = stair_images,
+		paramtype = "light",
+		paramtype2 = "facedir",
+		is_ground_content = false,
+		groups = groups,
+		sounds = sounds,
+		selection_box = slope_inner_corner_box,
+		collision_box = slope_inner_corner_box,
+	}
+	if groups.falling_node == nil then
+		node_data.on_place = rotate_and_place
+	else
+		node_data.groups.falling_natural_slope = 1
+	end
+	local slope_name = natural_slopes.get_inner_corner_slope_name(subname)
+	minetest.register_node(slope_name, node_data)
+	if recipeitem then
+		natural_slopes.inner_corner_replacements[recipeitem] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+		minetest.register_craft({
+			output = slope_name .. ' 6',
+			recipe = {
+				{ "", recipeitem, ""},
+				{ recipeitem, "", recipeitem},
+				{recipeitem, recipeitem, recipeitem},
+			},
+		})
+		-- Use stairs to craft full blocks again (1:1)
+		minetest.register_craft({
+			output = recipeitem .. ' 4',
+			recipe = {
+				{slope_name, slope_name},
+				{slope_name, slope_name},
+			},
+		})
+	end
+end
+
+--[[ Register an outer corner slope (see register_straight_slope for documentation) --]]
+function natural_slopes.register_slope_outer(subname, recipeitem, groups, images, description, sounds)
+	local stair_images = {}
+	for i, image in ipairs(images) do
+		if type(image) == "string" then
+			stair_images[i] = {
+				name = image,
+				backface_culling = true,
+			}
+		elseif image.backface_culling == nil then -- override using any other value
+			stair_images[i] = table.copy(image)
+			stair_images[i].backface_culling = true
+		end
+	end
+	groups.stair = 1
+	groups.natural_slope = 1
+	node_data = {
+		description = description .. " Outer",
+		drawtype = "mesh",
+		mesh = "twelve-twelve-oc.obj",
+		tiles = stair_images,
+		paramtype = "light",
+		paramtype2 = "facedir",
+		is_ground_content = false,
+		groups = groups,
+		sounds = sounds,
+		selection_box = slope_outer_corner_box,
+		collision_box = slope_outer_corner_box,
+	}
+	if groups.falling_node == nil then
+		node_data.on_place = rotate_and_place
+	else
+		node_data.groups.falling_natural_slope = 1
+	end
+	local slope_name = natural_slopes.get_outer_corner_slope_name(subname)
+	minetest.register_node(slope_name, node_data)
+	if recipeitem then
+		natural_slopes.outer_corner_replacements[recipeitem] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+		minetest.register_craft({
+			output = slope_name .. ' 4',
+			recipe = {
+				{ "", "", ""},
+				{ "", recipeitem, ""},
+				{recipeitem, recipeitem, recipeitem},
+			},
+		})
+		-- Use stairs to craft full blocks again (1:1)
+		minetest.register_craft({
+			output = recipeitem .. ' 4',
+			recipe = {
+				{slope_name, slope_name},
+				{slope_name, slope_name},
+			},
+		})
+	end
+
+end
+
+--[[ Shortut to register straight and corner slopes for of a single material --]]
+function natural_slopes.register_slope(subname, recipeitem, groups, images, description, sounds)
+	natural_slopes.register_slope_straight(subname, recipeitem, groups, images, description, sounds)
+	natural_slopes.register_slope_inner(subname, recipeitem, groups, images, description, sounds)
+	natural_slopes.register_slope_outer(subname, recipeitem, groups, images, description, sounds)
+end
