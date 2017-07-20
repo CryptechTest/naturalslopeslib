@@ -4,6 +4,9 @@ Describes the falling/eroding effect for slopes
 
 function natural_slopes.select_and_replace(from, name, pos, pointing)
 	local replacement = from[name]
+	if not replacement then
+		replacement = from[natural_slopes.rebuild_replacements[name]]
+	end
 	if replacement and pointing then
 		minetest.set_node(pos, {name=replacement, paramtype2='facedir', param2=minetest.dir_to_facedir(pointing)})
 	elseif replacement then
@@ -82,13 +85,17 @@ function natural_slopes.slide(pos, node)
 	-- For no free neighbor check for a free diagonal for an inner corner
 	-- or fully surrounded for a rebuild
 	else
-		if natural_slopes.is_free_for_erosion({x=pos.x+1, y=pos.y, z=pos.z+1}) then
+		local airXPZP = natural_slopes.is_free_for_erosion({x=pos.x+1, y=pos.y, z=pos.z+1})
+		local airXPZM = natural_slopes.is_free_for_erosion({x=pos.x+1, y=pos.y, z=pos.z-1})
+		local airXMZP = natural_slopes.is_free_for_erosion({x=pos.x-1, y=pos.y, z=pos.z+1})
+		local airXMZM = natural_slopes.is_free_for_erosion({x=pos.x-1, y=pos.y, z=pos.z-1})
+		if airXPZP and not airXPZM and not airXMZP and not airXMZM then
 			natural_slopes.select_and_replace(natural_slopes.inner_corner_replacements, node.name, pos, {x=-1, y=0, z=0})
-		elseif natural_slopes.is_free_for_erosion({x=pos.x+1, y=pos.y, z=pos.z-1}) then
+		elseif not airXPZP and airXPZM and not airXMZP and not airXMZM then
 			natural_slopes.select_and_replace(natural_slopes.inner_corner_replacements, node.name, pos, {x=0, y=0, z=1})
-		elseif natural_slopes.is_free_for_erosion({x=pos.x-1, y=pos.y, z=pos.z+1}) then
+		elseif not airXPZP and not airXPZM and airXMZP and not airXMZM then
 			natural_slopes.select_and_replace(natural_slopes.inner_corner_replacements, node.name, pos, {x=0, y=0, z=-1})
-		elseif natural_slopes.is_free_for_erosion({x=pos.x-1, y=pos.y, z=pos.z-1}) then
+		elseif not airXPZP and not airXPZM and not airXMZP and airXMZM then
 			natural_slopes.select_and_replace(natural_slopes.inner_corner_replacements, node.name, pos, {x=1, y=0, z=0})
 		else
 			natural_slopes.select_and_replace(natural_slopes.rebuild_replacements, node.name, pos)
