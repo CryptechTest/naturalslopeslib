@@ -1,0 +1,5 @@
+-- Natural slopes settings
+
+-- Update shape ABM settings
+natural_slopes.update_shape_abm_interval = 30
+natural_slopes.update_shape_abm_chance = 50

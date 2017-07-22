@@ -120,14 +120,11 @@ function natural_slopes.update_shape(pos, node)
 	end
 end
 
-local update_shape_interval = 30
-local update_shape_chance = 50
-
 minetest.register_abm({
 	label = 'slope sliding',
 	nodenames = {'group:falling_node', 'group:falling_natural_slope'},
-	interval = update_shape_interval,
-	chance = update_shape_chance,
+	interval = natural_slopes.update_shape_abm_interval,
+	chance = natural_slopes.update_shape_abm_chance,
 	action = natural_slopes.update_shape,
 })
 

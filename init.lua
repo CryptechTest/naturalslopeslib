@@ -20,6 +20,9 @@ function natural_slopes.get_outer_corner_slope_name(subname)
 	return 'natural_slopes:slope_outer_' .. subname
 end
 
+-- Load default configuration values
+dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/default_settings.txt")
+
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")
 
