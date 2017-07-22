@@ -28,6 +28,16 @@ local slope_outer_corner_box = {
 	},
 }
 
+-- Set mesh constants according to settings
+local SLOPE_MESH = "twelve-twelve.obj"
+local INNER_CORNER_MESH = "twelve-twelve-ic.obj"
+local OUTER_CORNER_MESH = "twelve-twelve-oc.obj"
+if natural_slopes.rendering_mode == 'cubic' then
+	SLOPE_MESH = "stairs_stair.obj"
+	INNER_CORNER_MESH = "stairs_stair_inner.obj"
+	OUTER_CORNER_MESH = "stairs_stair_outer.obj"
+end
+
 --- {Private} Place node upward or downward according to the pointer position
 -- inside the target.
 local function rotate_and_place(itemstack, placer, pointed_thing)
@@ -83,7 +93,7 @@ function natural_slopes.register_slope_straight(subname, base_node_name, groups,
 	local node_data = {
 		description = description,
 		drawtype = "mesh",
-		mesh = "twelve-twelve.obj",
+		mesh = SLOPE_MESH,
 		tiles = stair_images,
 		paramtype = "light",
 		paramtype2 = "facedir",
@@ -149,7 +159,7 @@ function natural_slopes.register_slope_inner(subname, base_node_name, groups, im
 	node_data = {
 		description = description .. " Inner",
 		drawtype = "mesh",
-		mesh = "twelve-twelve-ic.obj",
+		mesh = INNER_CORNER_MESH,
 		tiles = stair_images,
 		paramtype = "light",
 		paramtype2 = "facedir",
@@ -213,7 +223,7 @@ function natural_slopes.register_slope_outer(subname, base_node_name, groups, im
 	node_data = {
 		description = description .. " Outer",
 		drawtype = "mesh",
-		mesh = "twelve-twelve-oc.obj",
+		mesh = OUTER_CORNER_MESH,
 		tiles = stair_images,
 		paramtype = "light",
 		paramtype2 = "facedir",

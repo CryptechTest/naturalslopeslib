@@ -23,6 +23,14 @@ end
 -- Load default configuration values
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/default_settings.txt")
 
+-- Check dependencies compatibility
+if natural_slopes.rendering_mode == 'cubic' and not _G.stairs then
+	natural_slopes.rendering_mode = 'smooth'
+end
+if natural_slopes.rendering_mode ~= 'smooth' and natural_slopes.rendering_mode ~= 'cubic' then
+	natural_slopes.rendering_mode = 'smooth'
+end
+
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")
 

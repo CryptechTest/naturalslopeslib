@@ -3,3 +3,7 @@
 -- Update shape ABM settings
 natural_slopes.update_shape_abm_interval = 30
 natural_slopes.update_shape_abm_chance = 50
+
+-- Appearance settings. Either 'smooth' or 'cubic' (with '')
+-- 'cubic' requires the stairs mod.
+natural_slopes.rendering_mode = 'smooth'
