@@ -28,7 +28,8 @@ local slope_outer_corner_box = {
 	},
 }
 
--- Place node upward or downward according to the pointer position inside the target
+--- {Private} Place node upward or downward according to the pointer position
+-- inside the target.
 local function rotate_and_place(itemstack, placer, pointed_thing)
 	if pointed_thing.type ~= "node" then
 		return itemstack
@@ -57,15 +58,14 @@ local function rotate_and_place(itemstack, placer, pointed_thing)
 	return minetest.item_place(itemstack, placer, pointed_thing, param2)
 end
 
---[[ Register a straight slope and recipe and so
--- @param subname: The block will be registered as :slope:slope_<subname>
--- @param recipeitem: The base item to use to build the slope
--- @param groups: The groups that the slope node will have
+--- {Private} Register a straight slope and link to the original node.
+-- @param subname: The name passed to natural_slopes.get_straigth_slope_name
+-- @param base_node_name: The full block node name.
+-- @param groups: The groups that the slope node will have.
 -- @param images:
--- @param descriptions: Description of the new slope node
+-- @param descriptions: Description of the new slope node.
 -- @param sounds:
---]]
-function natural_slopes.register_slope_straight(subname, recipeitem, groups, images, description, sounds)
+function natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -100,22 +100,22 @@ function natural_slopes.register_slope_straight(subname, recipeitem, groups, ima
 	end
 	local slope_name = natural_slopes.get_straight_slope_name(subname)
 	minetest.register_node(slope_name, node_data)
-	if recipeitem then
-		natural_slopes.straight_replacements[recipeitem] = slope_name
-		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+	if base_node_name then
+		natural_slopes.straight_replacements[base_node_name] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = base_node_name
 		-- Recipe matches appearence in inventory
 		minetest.register_craft({
 			output = slope_name .. ' 6',
 			recipe = {
-				{"", "", recipeitem},
-				{"", recipeitem, recipeitem},
-				{recipeitem, recipeitem, recipeitem},
+				{"", "", base_node_name},
+				{"", base_node_name, base_node_name},
+				{base_node_name, base_node_name, base_node_name},
 			},
 		})
 
 		-- Use stairs to craft full blocks again (1:1)
 		minetest.register_craft({
-			output = recipeitem .. ' 4',
+			output = base_node_name .. ' 4',
 			recipe = {
 				{slope_name, slope_name},
 				{slope_name, slope_name},
@@ -124,8 +124,14 @@ function natural_slopes.register_slope_straight(subname, recipeitem, groups, ima
 	end
 end
 
---[[ Register an inner corner slope (see register_straight_slope for documentation) --]]
-function natural_slopes.register_slope_inner(subname, recipeitem, groups, images, description, sounds)
+--- {Private} Register an inner corner and link to the original node.
+-- @param subname: The name passed to natural_slopes.get_straigth_inner_corner_name
+-- @param base_node_name: The full block node name.
+-- @param groups: The groups that the slope node will have.
+-- @param images:
+-- @param descriptions: Description of the new slope node.
+-- @param sounds:
+function natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -160,20 +166,20 @@ function natural_slopes.register_slope_inner(subname, recipeitem, groups, images
 	end
 	local slope_name = natural_slopes.get_inner_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_data)
-	if recipeitem then
-		natural_slopes.inner_corner_replacements[recipeitem] = slope_name
-		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+	if base_node_name then
+		natural_slopes.inner_corner_replacements[base_node_name] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = base_node_name
 		minetest.register_craft({
 			output = slope_name .. ' 6',
 			recipe = {
-				{ "", recipeitem, ""},
-				{ recipeitem, "", recipeitem},
-				{recipeitem, recipeitem, recipeitem},
+				{ "", base_node_name, ""},
+				{ base_node_name, "", base_node_name},
+				{base_node_name, base_node_name, base_node_name},
 			},
 		})
 		-- Use stairs to craft full blocks again (1:1)
 		minetest.register_craft({
-			output = recipeitem .. ' 4',
+			output = base_node_name .. ' 4',
 			recipe = {
 				{slope_name, slope_name},
 				{slope_name, slope_name},
@@ -182,8 +188,14 @@ function natural_slopes.register_slope_inner(subname, recipeitem, groups, images
 	end
 end
 
---[[ Register an outer corner slope (see register_straight_slope for documentation) --]]
-function natural_slopes.register_slope_outer(subname, recipeitem, groups, images, description, sounds)
+--- {Private} Register an outer corner and link to the original node.
+-- @param subname: The name passed to natural_slopes.get_straigth_inner_corner_name
+-- @param base_node_name: The full block node name.
+-- @param groups: The groups that the slope node will have.
+-- @param images:
+-- @param descriptions: Description of the new slope node.
+-- @param sounds:
+function natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -218,20 +230,20 @@ function natural_slopes.register_slope_outer(subname, recipeitem, groups, images
 	end
 	local slope_name = natural_slopes.get_outer_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_data)
-	if recipeitem then
-		natural_slopes.outer_corner_replacements[recipeitem] = slope_name
-		natural_slopes.rebuild_replacements[slope_name] = recipeitem
+	if base_node_name then
+		natural_slopes.outer_corner_replacements[base_node_name] = slope_name
+		natural_slopes.rebuild_replacements[slope_name] = base_node_name
 		minetest.register_craft({
 			output = slope_name .. ' 4',
 			recipe = {
 				{ "", "", ""},
-				{ "", recipeitem, ""},
-				{recipeitem, recipeitem, recipeitem},
+				{ "", base_node_name, ""},
+				{base_node_name, base_node_name, base_node_name},
 			},
 		})
 		-- Use stairs to craft full blocks again (1:1)
 		minetest.register_craft({
-			output = recipeitem .. ' 4',
+			output = base_node_name .. ' 4',
 			recipe = {
 				{slope_name, slope_name},
 				{slope_name, slope_name},
@@ -241,9 +253,15 @@ function natural_slopes.register_slope_outer(subname, recipeitem, groups, images
 
 end
 
---[[ Shortut to register straight and corner slopes for of a single material --]]
-function natural_slopes.register_slope(subname, recipeitem, groups, images, description, sounds)
-	natural_slopes.register_slope_straight(subname, recipeitem, groups, images, description, sounds)
-	natural_slopes.register_slope_inner(subname, recipeitem, groups, images, description, sounds)
-	natural_slopes.register_slope_outer(subname, recipeitem, groups, images, description, sounds)
+--- Register slopes from a full block node.
+-- @param subname: The name passed to natural_slopes.get_*_name
+-- @param base_node_name: The full block node name.
+-- @param groups: The groups that the slope nodes will have.
+-- @param images:
+-- @param descriptions: Description of the new slope node.
+-- @param sounds:
+function natural_slopes.register_slope(subname, base_node_name, groups, images, description, sounds)
+	natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds)
+	natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds)
+	natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds)
 end

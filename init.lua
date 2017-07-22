@@ -8,10 +8,10 @@ natural_slopes.inner_corner_replacements = {}
 natural_slopes.outer_corner_replacements = {}
 natural_slopes.rebuild_replacements = {}
 
--- Get node name for slopes from a subname.
--- For example 'dirt' will be named 'slopes:slope_dirt'
+--- Get node name for slopes from a subname.
+-- For example 'dirt' will be named 'natural_slopes:slope_dirt'
 function natural_slopes.get_straight_slope_name(subname)
-	return 'natural_slopes:slope_' .. subname	
+	return 'natural_slopes:slope_' .. subname
 end
 function natural_slopes.get_inner_corner_slope_name(subname)
 	return 'natural_slopes:slope_inner_' .. subname
@@ -26,4 +26,4 @@ dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes
 -- Define new nodes
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua")
 
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/falling.lua")
+dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")

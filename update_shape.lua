@@ -2,6 +2,11 @@
 Describes the falling/eroding effect for slopes
 --]]
 
+--- {Private} Pick a replacement node and set it at pos.
+-- @param from The replacement table to pick replacement from.
+-- @param name The name of the node to replace.
+-- @param pos The position of the node to replace
+-- @param pointing Optional vector to orient the new node.
 function natural_slopes.select_and_replace(from, name, pos, pointing)
 	local replacement = from[name]
 	if not replacement then
@@ -14,13 +19,18 @@ function natural_slopes.select_and_replace(from, name, pos, pointing)
 	end
 end
 
+--- Check if a node is considered empty to switch shape.
+-- @param pos The position to check
 function natural_slopes.is_free_for_erosion(pos)
 	if minetest.get_node(pos).name == 'air' then return true end
 	-- TODO add water for canditates
 	return false
 end
 
-function natural_slopes.slide(pos, node)
+--- Try to update the shape of a node according to it's surroundings.
+-- @param pos The position of the node.
+-- @param node The node at that position.
+function natural_slopes.update_shape(pos, node)
 	-- If there's something above, don't erode
 	if minetest.get_node({x=pos.x, y=pos.y+1, z=pos.z}).name ~= 'air' then return end
 	-- Check blocks around
@@ -103,28 +113,28 @@ function natural_slopes.slide(pos, node)
 	end
 end
 
-local slide_interval = 30
-local slide_chance = 50
+local update_shape_interval = 30
+local update_shape_chance = 50
 
 minetest.register_abm({
 	label = 'slope sliding',
 	nodenames = {'group:falling_node', 'group:falling_natural_slope'},
-	interval = slide_interval,
-	chance = slide_chance,
-	action = natural_slopes.slide,
+	interval = update_shape_interval,
+	chance = update_shape_chance,
+	action = natural_slopes.update_shape,
 })
 
-minetest.register_chatcommand('erode', {
+minetest.register_chatcommand('updshape', {
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if not player then return false, 'Player not found' end
-		if not minetest.check_player_privs(player, {server=true}) then return false, 'Erode requires server privileges' end
+		if not minetest.check_player_privs(player, {server=true}) then return false, 'Update shape requires server privileges' end
 		local pos = player:getpos()
 		local node_pos = {['x'] = pos.x, ['y'] = pos.y - 1, ['z'] = pos.z}
 		local node = minetest.get_node(node_pos)
 		if minetest.get_node_group(node.name, 'falling_node') ~= nil then
-			return true, natural_slopes.slide(node_pos, node)
+			return true, natural_slopes.update_shape(node_pos, node)
 		end
-		return false, 'Ignored node ' .. node.name
+		return false, node.name .. " cannot have it's shape updated."
 	end,
 })
