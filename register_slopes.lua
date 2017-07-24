@@ -32,7 +32,7 @@ local slope_outer_corner_box = {
 local SLOPE_MESH = "twelve-twelve.obj"
 local INNER_CORNER_MESH = "twelve-twelve-ic.obj"
 local OUTER_CORNER_MESH = "twelve-twelve-oc.obj"
-if natural_slopes.rendering_mode == 'cubic' then
+if natural_slopes.setting_rendering_mode() == 1 then
 	SLOPE_MESH = "stairs_stair.obj"
 	INNER_CORNER_MESH = "stairs_stair_inner.obj"
 	OUTER_CORNER_MESH = "stairs_stair_outer.obj"
@@ -260,7 +260,6 @@ function natural_slopes.register_slope_outer(subname, base_node_name, groups, im
 			},
 		})
 	end
-
 end
 
 --- Register slopes from a full block node.

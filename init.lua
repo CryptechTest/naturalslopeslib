@@ -20,16 +20,24 @@ function natural_slopes.get_outer_corner_slope_name(subname)
 	return 'natural_slopes:slope_outer_' .. subname
 end
 
--- Load default configuration values
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/default_settings.txt")
+-- Set functions to get configuration and default values
+function natural_slopes.setting_rendering_mode()
+	local mode = tonumber(minetest.setting_get('natural_slopes.rendering_mode')) or 0
+	if mode == 1 and not _G.stairs then mode = 0 end
+	return mode
+end
+function natural_slopes.setting_enable_shape_abm()
+	local value = minetest.setting_getbool('natural_slopes.enable_shape_abm')
+	if value == nil then return true end
+	return value
+end
+function natural_slopes.setting_update_shape_abm_interval()
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_interval')) or 30
+end
+function natural_slopes.setting_update_shape_abm_chance()
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_chance')) or 50
+end
 
--- Check dependencies compatibility
-if natural_slopes.rendering_mode == 'cubic' and not _G.stairs then
-	natural_slopes.rendering_mode = 'smooth'
-end
-if natural_slopes.rendering_mode ~= 'smooth' and natural_slopes.rendering_mode ~= 'cubic' then
-	natural_slopes.rendering_mode = 'smooth'
-end
 
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")

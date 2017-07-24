@@ -120,13 +120,16 @@ function natural_slopes.update_shape(pos, node)
 	end
 end
 
-minetest.register_abm({
-	label = 'slope sliding',
-	nodenames = {'group:falling_node', 'group:falling_natural_slope'},
-	interval = natural_slopes.update_shape_abm_interval,
-	chance = natural_slopes.update_shape_abm_chance,
-	action = natural_slopes.update_shape,
-})
+
+if natural_slopes.setting_enable_shape_abm() then
+	minetest.register_abm({
+		label = 'slope sliding',
+		nodenames = {'group:falling_node', 'group:falling_natural_slope'},
+		interval = natural_slopes.setting_update_shape_abm_interval(),
+		chance = natural_slopes.setting_update_shape_abm_chance(),
+		action = natural_slopes.update_shape,
+	})
+end
 
 minetest.register_chatcommand('updshape', {
 	func = function(name, param)
