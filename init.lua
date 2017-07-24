@@ -7,6 +7,9 @@ natural_slopes.straight_replacements = {}
 natural_slopes.inner_corner_replacements = {}
 natural_slopes.outer_corner_replacements = {}
 natural_slopes.rebuild_replacements = {}
+-- Table of all node names managed by this mod. Name as key for efficient lookup.
+-- Populated with register_slope
+natural_slopes.all_nodes = {}
 
 --- Get node name for slopes from a subname.
 -- For example 'dirt' will be named 'natural_slopes:slope_dirt'
@@ -37,7 +40,11 @@ end
 function natural_slopes.setting_update_shape_abm_chance()
 	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_chance')) or 50
 end
-
+function natural_slopes.setting_enable_shape_on_walk()
+	local value = minetest.setting_getbool('natural_slopes.enable_shape_on_walk')
+	if value == nil then return true end
+	return value
+end
 
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")

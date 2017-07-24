@@ -131,6 +131,20 @@ if natural_slopes.setting_enable_shape_abm() then
 	})
 end
 
+
+--- Player movement callback, try to update shape on walk
+function natural_slopes.update_shape_on_walk(player, old_pos, new_pos)
+	local pos_below = {x=new_pos.x, y=new_pos.y-1, z=new_pos.z}
+	local node_below = minetest.get_node(pos_below)
+	if natural_slopes.all_nodes[node_below.name] then
+		natural_slopes.update_shape(pos_below, node_below)
+	end
+end
+
+if _G.poschangelib then
+	poschangelib.add_player_pos_listener(natural_slopes.update_shape_on_walk)
+end
+
 minetest.register_chatcommand('updshape', {
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)

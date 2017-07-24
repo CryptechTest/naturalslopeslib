@@ -113,6 +113,8 @@ function natural_slopes.register_slope_straight(subname, base_node_name, groups,
 	if base_node_name then
 		natural_slopes.straight_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
+		natural_slopes.all_nodes[base_node_name] = true
+		natural_slopes.all_nodes[slope_name] = true
 		-- Recipe matches appearence in inventory
 		minetest.register_craft({
 			output = slope_name .. ' 6',
@@ -179,6 +181,8 @@ function natural_slopes.register_slope_inner(subname, base_node_name, groups, im
 	if base_node_name then
 		natural_slopes.inner_corner_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
+		natural_slopes.all_nodes[base_node_name] = true
+		natural_slopes.all_nodes[slope_name] = true
 		minetest.register_craft({
 			output = slope_name .. ' 6',
 			recipe = {
@@ -243,6 +247,8 @@ function natural_slopes.register_slope_outer(subname, base_node_name, groups, im
 	if base_node_name then
 		natural_slopes.outer_corner_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
+		natural_slopes.all_nodes[base_node_name] = true
+		natural_slopes.all_nodes[slope_name] = true
 		minetest.register_craft({
 			output = slope_name .. ' 4',
 			recipe = {
