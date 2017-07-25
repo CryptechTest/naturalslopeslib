@@ -142,7 +142,7 @@ function natural_slopes.update_shape_on_walk(player, old_pos, new_pos)
 end
 
 if _G.poschangelib then
-	poschangelib.add_player_pos_listener(natural_slopes.update_shape_on_walk)
+	poschangelib.add_player_pos_listener('natural_slopes:update_on_walk', natural_slopes.update_shape_on_walk)
 end
 
 minetest.register_chatcommand('updshape', {
