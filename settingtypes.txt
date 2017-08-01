@@ -19,3 +19,10 @@ natural_slopes.update_shape_abm_interval (Automatic shape update interval) int 3
 
 # Enable or disable shape update when walking on blocks (requires poschangelib mod).
 natural_slopes.enable_shape_on_walk (Enable sliding by walking on edges) bool true
+
+
+## Nodes
+
+# Register slopes for the node declared in default mod. Disable it if you want to use
+# natural_slopes only as a library for other mods.
+natural_slopes.register_default_slopes (Register slopes for default nodes) bool true

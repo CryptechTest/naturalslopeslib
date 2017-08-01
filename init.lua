@@ -42,10 +42,17 @@ function natural_slopes.setting_enable_shape_on_walk()
 	if value == nil then return true end
 	return value
 end
+function natural_slopes.setting_register_default_nodes()
+	local value = minetest.setting_getbool('natural_slopes.register_default_slopes')
+	if not _G.default then value = false end
+	return value
+end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")
 
 -- Define new nodes
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua")
+if natural_slopes.setting_register_default_nodes() then
+	dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua")
+end
