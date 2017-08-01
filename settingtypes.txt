@@ -14,10 +14,6 @@ natural_slopes.enable_shape_abm (Enable automatic shape update) bool true
 # The lower the value, the smoother the update will be but it will cost more server resources.
 natural_slopes.update_shape_abm_interval (Automatic shape update interval) int 30 0
 
-# Every block will have a chance of having it's shape updated during the ABM
-# The lower the value, the more blocks will be updated at once.
-natural_slopes.update_shape_abm_chance (Chance of automatic update: one of X) int 50
-
 
 ## Update shape on walk
 

@@ -31,6 +31,14 @@ function natural_slopes.is_free_for_erosion(pos)
 	return false
 end
 
+-- Do shape update when random roll passes.
+function natural_slopes.chance_update_shape(pos, node)
+	local chance = natural_slopes.all_nodes[node.name]
+	if chance and (math.random() * chance) < 1.0 then
+		natural_slopes.update_shape(pos, node)
+	end
+end
+
 --- Try to update the shape of a node according to it's surroundings.
 -- @param pos The position of the node.
 -- @param node The node at that position.
@@ -126,23 +134,15 @@ if natural_slopes.setting_enable_shape_abm() then
 		label = 'slope sliding',
 		nodenames = {'group:falling_node', 'group:falling_natural_slope'},
 		interval = natural_slopes.setting_update_shape_abm_interval(),
-		chance = natural_slopes.setting_update_shape_abm_chance(),
-		action = natural_slopes.update_shape,
+		chance = 1,
+		action = natural_slopes.chance_update_shape,
 	})
 end
 
 
 --- Player movement callback, try to update shape on walk
-function natural_slopes.update_shape_on_walk(player, old_pos, new_pos)
-	local pos_below = {x=new_pos.x, y=new_pos.y-1, z=new_pos.z}
-	local node_below = minetest.get_node(pos_below)
-	if natural_slopes.all_nodes[node_below.name] then
-		natural_slopes.update_shape(pos_below, node_below)
-	end
-end
-
-if _G.poschangelib then
-	poschangelib.add_player_pos_listener('natural_slopes:update_on_walk', natural_slopes.update_shape_on_walk)
+function natural_slopes.update_shape_on_walk(player, pos, node, node_desc)
+	natural_slopes.chance_update_shape(pos, node)
 end
 
 minetest.register_chatcommand('updshape', {

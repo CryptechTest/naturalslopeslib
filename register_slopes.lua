@@ -75,7 +75,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds)
+function natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds, update_chance)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -113,8 +113,13 @@ function natural_slopes.register_slope_straight(subname, base_node_name, groups,
 	if base_node_name then
 		natural_slopes.straight_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
-		natural_slopes.all_nodes[base_node_name] = true
-		natural_slopes.all_nodes[slope_name] = true
+		natural_slopes.all_nodes[base_node_name] = update_chance
+		natural_slopes.all_nodes[slope_name] = update_chance
+		if _G.poschangelib then
+			poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+				natural_slopes.update_shape_on_walk,
+				{slope_name})
+		end
 		-- Recipe matches appearence in inventory
 		minetest.register_craft({
 			output = slope_name .. ' 6',
@@ -143,7 +148,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds)
+function natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds, update_chance)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -181,8 +186,13 @@ function natural_slopes.register_slope_inner(subname, base_node_name, groups, im
 	if base_node_name then
 		natural_slopes.inner_corner_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
-		natural_slopes.all_nodes[base_node_name] = true
-		natural_slopes.all_nodes[slope_name] = true
+		natural_slopes.all_nodes[base_node_name] = update_chance
+		natural_slopes.all_nodes[slope_name] = update_chance
+		if _G.poschangelib then
+			poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+				natural_slopes.update_shape_on_walk,
+				{slope_name})
+		end
 		minetest.register_craft({
 			output = slope_name .. ' 6',
 			recipe = {
@@ -209,7 +219,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds)
+function natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds, update_chance)
 	local stair_images = {}
 	for i, image in ipairs(images) do
 		if type(image) == "string" then
@@ -247,8 +257,13 @@ function natural_slopes.register_slope_outer(subname, base_node_name, groups, im
 	if base_node_name then
 		natural_slopes.outer_corner_replacements[base_node_name] = slope_name
 		natural_slopes.rebuild_replacements[slope_name] = base_node_name
-		natural_slopes.all_nodes[base_node_name] = true
-		natural_slopes.all_nodes[slope_name] = true
+		natural_slopes.all_nodes[base_node_name] = update_chance
+		natural_slopes.all_nodes[slope_name] = update_chance
+		if _G.poschangelib then
+			poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+				natural_slopes.update_shape_on_walk,
+				{slope_name})
+		end
 		minetest.register_craft({
 			output = slope_name .. ' 4',
 			recipe = {
@@ -275,8 +290,14 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope(subname, base_node_name, groups, images, description, sounds)
-	natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds)
-	natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds)
-	natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds)
+function natural_slopes.register_slope(subname, base_node_name, groups, images, description, sounds, update_chance)
+	natural_slopes.register_slope_straight(subname, base_node_name, groups, images, description, sounds, update_chance)
+	natural_slopes.register_slope_inner(subname, base_node_name, groups, images, description, sounds, update_chance)
+	natural_slopes.register_slope_outer(subname, base_node_name, groups, images, description, sounds, update_chance)
+	if _G.poschangelib then
+		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+			natural_slopes.update_shape_on_walk,
+			{base_node_name})
+	end
+
 end

@@ -14,7 +14,8 @@ natural_slopes.register_slope(
 	"Dirt slope",
 	default.node_sound_dirt_defaults({
 		footstep = {['name'] = "default_grass_footstep", ['gain'] = 0.25},
-	})
+	}),
+	10
 )
 
 
@@ -26,7 +27,8 @@ natural_slopes.register_slope(
 	{crumbly = 3, falling_node = 1, sand = 1},
 	{"default_sand.png"},
 	"Sand slope",
-	default.node_sound_sand_defaults()
+	default.node_sound_sand_defaults(),
+	5
 )
 natural_slopes.register_slope(
 	"desert_sand",
@@ -34,7 +36,8 @@ natural_slopes.register_slope(
 	{crumbly = 3, falling_node = 1, sand = 1},
 	{"default_desert_sand.png"},
 	"Silver sand slope",
-	default.node_sound_sand_defaults()
+	default.node_sound_sand_defaults(),
+	5
 )
 natural_slopes.register_slope(
 	"silver_sand",
@@ -42,7 +45,8 @@ natural_slopes.register_slope(
 	{crumbly = 3, falling_node = 1, sand = 1},
 	{"default_silver_sand.png"},
 	"Desert sand slope",
-	default.node_sound_sand_defaults()
+	default.node_sound_sand_defaults(),
+	5
 )
 natural_slopes.register_slope(
 	"gravel",
@@ -50,5 +54,6 @@ natural_slopes.register_slope(
 	{crumbly = 2, falling_node = 1},
 	{"default_gravel.png"},
 	"Gravel slope",
-	default.node_sound_sand_defaults()
+	default.node_sound_sand_defaults(),
+	7
 )

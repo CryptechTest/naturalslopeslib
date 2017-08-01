@@ -20,3 +20,20 @@ As Minetest main unit is the block, having half-sized blocks can break a lot of 
 Thus half-blocks like slopes are still considered as a single block (either for recipes
 or for placing items). A single slop can turn back to a full node and vice-versa and
 half-blocks are not considered buildable upon (they will transform back into full block)
+
+
+How to define new slopes
+------------------------
+
+Call natural_slopes.register_slope to declare new slope nodes and bind shape update
+events on the original node and the newly created slopes.
+
+It takes 7 arguments
+  subname: The name without mod prefix of the original node
+  base_node_name: full original node name
+  groups: groups that the slope will have (generally the same as the original node)
+  images: textures for the slope nodes
+  description: Human friendly name
+  sounds: stepping sounds for the new node (generally the same as the original node)
+  update_chance: inverted chance to the node to update it's shape when an update event
+      occurs on it.
