@@ -54,5 +54,5 @@ dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes
 
 -- Define new nodes
 if natural_slopes.setting_register_default_nodes() then
-	dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua")
+	dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes/default.lua")
 end
