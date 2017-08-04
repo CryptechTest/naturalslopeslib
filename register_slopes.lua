@@ -80,8 +80,8 @@ function natural_slopes.register_slope_straight(base_node_name, node_desc, updat
 			{slope_name, slope_name},
 		},
 	})
-	-- Register walk listener if available
-	if _G.poschangelib then
+	-- Register walk listener
+	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
 			natural_slopes.update_shape_on_walk,
 			{slope_name})
@@ -128,8 +128,8 @@ function natural_slopes.register_slope_inner(base_node_name, node_desc, update_c
 			{slope_name, slope_name},
 		},
 	})
-	-- Register walk listener if available
-	if _G.poschangelib then
+	-- Register walk listener
+	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
 			natural_slopes.update_shape_on_walk,
 			{slope_name})
@@ -175,8 +175,8 @@ function natural_slopes.register_slope_outer(base_node_name, node_desc, update_c
 			{slope_name, slope_name},
 		},
 	})
-	-- Register walk listener if available
-	if _G.poschangelib then
+	-- Register walk listener
+	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
 			natural_slopes.update_shape_on_walk,
 			{slope_name})

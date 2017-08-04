@@ -153,8 +153,8 @@ minetest.register_chatcommand('updshape', {
 		local pos = player:getpos()
 		local node_pos = {['x'] = pos.x, ['y'] = pos.y - 1, ['z'] = pos.z}
 		local node = minetest.get_node(node_pos)
-		if minetest.get_node_group(node.name, 'falling_node') ~= nil then
-			return true, natural_slopes.update_shape(node_pos, node)
+		if natural_slopes.update_shape(node_pos, node) then
+			return true, 'Shape updated.'
 		end
 		return false, node.name .. " cannot have it's shape updated."
 	end,
