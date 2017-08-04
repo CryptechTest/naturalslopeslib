@@ -15,16 +15,44 @@ natural_slopes.register_slope("default:dirt", {
 	})},
 	10)
 natural_slopes.register_slope("default:dirt_with_grass", {
+	description = "Dirt with Grass slope",
 	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1},
-	tiles = {"default_grass.png", "default_dirt.png",
-		{name = "default_dirt.png^default_grass_side.png",
-			tileable_vertical = false}},
+	tiles = {"default_grass.png"},
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.25},
 	})},
 	50
 )
-
+natural_slopes.register_slope("default:dirt_with_dry_grass", {
+	description = "Dirt with Dry Grass slope",
+	tiles = {"default_dry_grass.png"},
+	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1},
+	drop = 'default:dirt',
+	sounds = default.node_sound_dirt_defaults({
+		footstep = {name = "default_grass_footstep", gain = 0.4},
+	}),
+	25
+})
+natural_slopes.register_slope("default:dirt_with_snow", {
+	description = "Dirt with Snow slope",
+	tiles = {"default_snow.png"},
+	groups = {crumbly = 3, spreading_dirt_type = 1, snowy = 1},
+	drop = 'default:dirt',
+	sounds = default.node_sound_dirt_defaults({
+		footstep = {name = "default_snow_footstep", gain = 0.15},
+	}),
+	50
+})
+natural_slopes.register_slope("default:dirt_with_rainforest_litter", {
+	description = "Dirt with Rainforest Litter slope",
+	tiles = {"default_rainforest_litter.png"},
+	groups = {crumbly = 3, soil = 1, spreading_dirt_type = 1},
+	drop = "default:dirt",
+	sounds = default.node_sound_dirt_defaults({
+		footstep = {name = "default_grass_footstep", gain = 0.4},
+	}),
+	15
+})
 
 -- Sand slopes
 
