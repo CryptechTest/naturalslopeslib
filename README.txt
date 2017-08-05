@@ -1,6 +1,6 @@
 Natural slopes
 
-Version 0.2
+Version 0.3
 Licence LGPLv2 and WTFPL, see LICENSE for the details
 Dependencies: default
 Optional dependencies:
@@ -28,12 +28,9 @@ How to define new slopes
 Call natural_slopes.register_slope to declare new slope nodes and bind shape update
 events on the original node and the newly created slopes.
 
-It takes 7 arguments
-  subname: The name without mod prefix of the original node
-  base_node_name: full original node name
-  groups: groups that the slope will have (generally the same as the original node)
-  images: textures for the slope nodes
-  description: Human friendly name
-  sounds: stepping sounds for the new node (generally the same as the original node)
+It takes 3 arguments
+  base_node_name: The name of the original node
+  node_desc: The basic description of the node. Some properties will be overwriten
+             for the new nodes.
   update_chance: inverted chance to the node to update it's shape when an update event
-      occurs on it.
+                 occurs on it.
