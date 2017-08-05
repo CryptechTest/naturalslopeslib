@@ -1,16 +1,6 @@
 -- Global namespace for functions
 natural_slopes = {}
 
--- Table of replacement from solid block to eroded slopes.
--- Populated on slope node registration
-natural_slopes.straight_replacements = {}
-natural_slopes.inner_corner_replacements = {}
-natural_slopes.outer_corner_replacements = {}
-natural_slopes.rebuild_replacements = {}
--- Table of all node names managed by this mod. Name as key, inverted chance
--- of update as values. Populated with register_slope.
-natural_slopes.all_nodes = {}
-
 --- Get node name for slopes from a subname.
 -- For example 'dirt' will be named 'natural_slopes:slope_dirt'
 function natural_slopes.get_straight_slope_name(subname)

@@ -1,3 +1,72 @@
+
+-- Table of replacement from solid block to slopes.
+-- Populated on slope node registration with add_replacement
+local replacements = {}
+local replacement_ids = {}
+local function add_replacement(source_name, update_chance)
+	local subname = string.sub(source_name, string.find(source_name, ':') + 1)
+	local straight_name = natural_slopes.get_straight_slope_name(subname)
+	local ic_name = natural_slopes.get_inner_corner_slope_name(subname)
+	local oc_name = natural_slopes.get_outer_corner_slope_name(subname)
+	local source_id = minetest.get_content_id(source_name)
+	local straight_id = minetest.get_content_id(straight_name)
+	local ic_id = minetest.get_content_id(ic_name)
+	local oc_id = minetest.get_content_id(oc_name)
+	-- Full to slopes
+	replacements[source_name] = {
+		straight = straight_name,
+		inner = ic_name,
+		outer = oc_name,
+		chance = update_chance
+	}
+	replacement_ids[source_id] = {
+		straight = straight_id,
+		inner = ic_id,
+		outer = oc_id,
+		chance = update_chance
+	}
+	-- Straight to full
+	replacements[straight_name] = {
+		source = source_name,
+		chance = update_chance
+	}
+	replacement_ids[straight_id] = {
+		source = source_id,
+		chance = update_chance
+	}
+	-- Inner to full
+	replacements[ic_name] = {
+		source = source_name,
+		chance = update_chance
+	}
+	replacement_ids[ic_id] = {
+		source = source_id,
+		chance = update_chance
+	}
+	-- Outer to full
+	replacements[oc_name] = {
+		source = source_name,
+		chance = update_chance
+	}
+	replacement_ids[oc_id] = {
+		source = source_id,
+		chance = update_chance
+	}
+end
+
+--- Get replacement description of a node.
+-- Contains replacement names in either source or (straight, inner, outer)
+-- and chance.
+function natural_slopes.get_replacement(source_node_name)
+	return replacements[source_node_name]
+end
+--- Get replacement description of a node by content id for VoxelManip.
+-- Contains replacement ids in either source or (straight, inner, outer)
+-- and chance.
+function natural_slopes.get_replacement_id(source_id)
+	return replacement_ids[source_id]
+end
+
 --[[ Bounding boxes
 Even with a slope model, we use a stair bounding box because it is less costly
 and is more bugproof that a precise box (sometime the player get stuck while trying
@@ -45,7 +114,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_straight(base_node_name, node_desc, update_chance)
+local function register_slope_straight(base_node_name, node_desc, update_chance)
 	-- Register slope node
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
 	node_desc.drawtype = "mesh"
@@ -59,11 +128,6 @@ function natural_slopes.register_slope_straight(base_node_name, node_desc, updat
 	node_desc.groups.natural_slope = 1
 	local slope_name = natural_slopes.get_straight_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	-- Set shape update data
-	natural_slopes.straight_replacements[base_node_name] = slope_name
-	natural_slopes.rebuild_replacements[slope_name] = base_node_name
-	natural_slopes.all_nodes[base_node_name] = update_chance
-	natural_slopes.all_nodes[slope_name] = update_chance
 	-- Set recipes
 	minetest.register_craft({
 			output = slope_name .. ' 6',
@@ -95,7 +159,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_inner(base_node_name, node_desc, update_chance)
+local function register_slope_inner(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
 	node_desc.drawtype = "mesh"
 	node_desc.mesh = INNER_CORNER_MESH
@@ -108,10 +172,6 @@ function natural_slopes.register_slope_inner(base_node_name, node_desc, update_c
 	node_desc.groups.natural_slope = 1
 	local slope_name = natural_slopes.get_inner_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	natural_slopes.inner_corner_replacements[base_node_name] = slope_name
-	natural_slopes.rebuild_replacements[slope_name] = base_node_name
-	natural_slopes.all_nodes[base_node_name] = update_chance
-	natural_slopes.all_nodes[slope_name] = update_chance
 	-- Set recipes
 	minetest.register_craft({
 			output = slope_name .. ' 6',
@@ -143,7 +203,7 @@ end
 -- @param images:
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
-function natural_slopes.register_slope_outer(base_node_name, node_desc, update_chance)
+local function register_slope_outer(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
 	node_desc.drawtype = "mesh"
 	node_desc.mesh = OUTER_CORNER_MESH
@@ -155,10 +215,6 @@ function natural_slopes.register_slope_outer(base_node_name, node_desc, update_c
 	node_desc.groups.natural_slope = 1
 	local slope_name = natural_slopes.get_outer_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	natural_slopes.outer_corner_replacements[base_node_name] = slope_name
-	natural_slopes.rebuild_replacements[slope_name] = base_node_name
-	natural_slopes.all_nodes[base_node_name] = update_chance
-	natural_slopes.all_nodes[slope_name] = update_chance
 	-- Set recipes
 	minetest.register_craft({
 			output = slope_name .. ' 4',
@@ -191,10 +247,16 @@ end
 -- @param descriptions: Description of the new slope node.
 -- @param sounds:
 function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
-	natural_slopes.register_slope_straight(base_node_name, node_desc, update_chance)
-	natural_slopes.register_slope_inner(base_node_name, node_desc, update_chance)
-	natural_slopes.register_slope_outer(base_node_name, node_desc, update_chance)
-	if _G.poschangelib then
+	if not update_chance then
+		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
+		return
+	end
+	register_slope_straight(base_node_name, node_desc, update_chance)
+	register_slope_inner(base_node_name, node_desc, update_chance)
+	register_slope_outer(base_node_name, node_desc, update_chance)
+	add_replacement(base_node_name, update_chance)
+
+	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
 			natural_slopes.update_shape_on_walk,
 			{base_node_name})
