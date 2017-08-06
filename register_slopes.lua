@@ -121,7 +121,6 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	node_desc.mesh = SLOPE_MESH
 	node_desc.selection_box = slope_straight_box
 	node_desc.collision_box = slope_straight_box
-	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
@@ -165,7 +164,6 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 	node_desc.mesh = INNER_CORNER_MESH
 	node_desc.selection_box = slope_inner_corner_box
 	node_desc.collision_box = slope_inner_corner_box
-	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
@@ -239,6 +237,16 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	end
 end
 
+local function table_copy(table)
+	local orig_type = type(table)
+	local copy = {}
+	if orig_type ~= 'table' then return table end
+	for orig_key, orig_value in next, table, nil do
+		copy[orig_key] = table_copy(orig_value)
+	end
+	return copy
+end
+
 --- Register slopes from a full block node.
 -- @param subname: The name passed to natural_slopes.get_*_name
 -- @param base_node_name: The full block node name.
@@ -251,15 +259,20 @@ function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
 	end
-	register_slope_straight(base_node_name, node_desc, update_chance)
-	register_slope_inner(base_node_name, node_desc, update_chance)
-	register_slope_outer(base_node_name, node_desc, update_chance)
+	-- Use a copy because tables are passed by reference. Otherwise the node
+	-- description is shared and updated even after minetest.register_node
+	local local_desc = table_copy(node_desc)
+	register_slope_straight(base_node_name, local_desc, update_chance)
+	local_desc = table_copy(node_desc)
+	register_slope_inner(base_node_name, local_desc, update_chance)
+	local_desc = table_copy(node_desc)
+	register_slope_outer(base_node_name, local_desc, update_chance)
 	add_replacement(base_node_name, update_chance)
-
+	-- Enable on walk update
 	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
 			natural_slopes.update_shape_on_walk,
 			{base_node_name})
 	end
-
 end
+
