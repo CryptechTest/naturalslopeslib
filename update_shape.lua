@@ -233,7 +233,9 @@ minetest.register_chatcommand('updshape', {
 })
 
 -- On generation big update
-minetest.register_on_generated(function(minp, maxp, seed)
-	natural_slopes.area_chance_update_shape(minp, maxp, 0.01)
-end)
+if natural_slopes.setting_enable_shape_on_generation() then
+	minetest.register_on_generated(function(minp, maxp, seed)
+		natural_slopes.area_chance_update_shape(minp, maxp, natural_slopes.setting_generation_factor())
+	end)
+end
 

@@ -26,3 +26,13 @@ natural_slopes.enable_shape_on_walk (Enable sliding by walking on edges) bool tr
 # Register slopes for the node declared in default mod. Disable it if you want to use
 # natural_slopes only as a library for other mods.
 natural_slopes.register_default_slopes (Register slopes for default nodes) bool true
+
+
+## Update shape on world generation
+
+# Enable or disable shape update when the world is generated.
+natural_slopes.enable_shape_on_generate (Shape update on generation) bool true
+
+# Inverted chance factor on generation. The lesser, the more likely the node will be
+# generated in their updated shape. 0.1 means 10 time more likely.
+natural_slopes.update_shape_generate_factor (Generation factor) float 0.001 0

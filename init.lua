@@ -39,6 +39,14 @@ function natural_slopes.setting_register_default_nodes()
 	if not _G.default then value = false end
 	return value
 end
+function natural_slopes.setting_enable_shape_on_generation()
+	local value = minetest.setting_getbool('natural_slopes.register_default_slopes')
+	if value == nil then value = true end
+	return value
+end
+function natural_slopes.setting_generation_factor()
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_generate_factor')) or 0.01
+end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods
