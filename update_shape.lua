@@ -87,7 +87,7 @@ function natural_slopes.area_chance_update_shape(minp, maxp, factor)
 	local area = VoxelArea:new{MinEdge = e1, MaxEdge = e2}
 	local data = vm:get_data()
 	local param2_data = vm:get_param2_data()
-	for i in area:iterp(minp, maxp) do
+	for i in area:iterp(vector.add(minp, 1), vector.add(maxp, -1)) do
 		local replacement = natural_slopes.get_replacement_id(data[i])
 		if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
 			natural_slopes.update_shape(i, data[i], area, data, param2_data)
