@@ -1,6 +1,6 @@
 Natural slopes
 
-Version 0.3
+Version 0.4
 Licence LGPLv2 and WTFPL, see LICENSE for the details
 Dependencies: default
 Optional dependencies:
