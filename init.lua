@@ -35,6 +35,7 @@ function natural_slopes.setting_enable_shape_on_walk()
 end
 function natural_slopes.setting_register_default_nodes()
 	local value = minetest.setting_getbool('natural_slopes.register_default_slopes')
+	if value == nil then value = true end
 	if not _G.default then value = false end
 	return value
 end
