@@ -13,45 +13,32 @@ local function add_replacement(source_name, update_chance)
 	local ic_id = minetest.get_content_id(ic_name)
 	local oc_id = minetest.get_content_id(oc_name)
 	-- Full to slopes
-	replacements[source_name] = {
+	local dest_data = {
+		source = source_name,
 		straight = straight_name,
 		inner = ic_name,
 		outer = oc_name,
 		chance = update_chance
 	}
-	replacement_ids[source_id] = {
+	local dest_data_id = {
+		source = source_id,
 		straight = straight_id,
 		inner = ic_id,
 		outer = oc_id,
 		chance = update_chance
 	}
-	-- Straight to full
-	replacements[straight_name] = {
-		source = source_name,
-		chance = update_chance
-	}
-	replacement_ids[straight_id] = {
-		source = source_id,
-		chance = update_chance
-	}
-	-- Inner to full
-	replacements[ic_name] = {
-		source = source_name,
-		chance = update_chance
-	}
-	replacement_ids[ic_id] = {
-		source = source_id,
-		chance = update_chance
-	}
-	-- Outer to full
-	replacements[oc_name] = {
-		source = source_name,
-		chance = update_chance
-	}
-	replacement_ids[oc_id] = {
-		source = source_id,
-		chance = update_chance
-	}
+	-- Block
+	replacements[source_name] = dest_data
+	replacement_ids[source_id] = dest_data_id
+	-- Straight
+	replacements[straight_name] = dest_data
+	replacement_ids[straight_id] = dest_data_id
+	-- Inner
+	replacements[ic_name] = dest_data
+	replacement_ids[ic_id] = dest_data_id
+	-- Outer
+	replacements[oc_name] = dest_data
+	replacement_ids[oc_id] = dest_data_id
 end
 
 --- Get replacement description of a node.
@@ -126,24 +113,11 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
+	if not node_desc.drop then
+		node_desc.drop = base_node_name
+	end
 	local slope_name = natural_slopes.get_straight_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	-- Set recipes
-	minetest.register_craft({
-			output = slope_name .. ' 6',
-			recipe = {
-				{"", "", base_node_name},
-				{"", base_node_name, base_node_name},
-				{base_node_name, base_node_name, base_node_name},
-		},
-	})
-	minetest.register_craft({
-		output = base_node_name .. ' 4',
-		recipe = {
-			{slope_name, slope_name},
-			{slope_name, slope_name},
-		},
-	})
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
@@ -170,24 +144,12 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
+	if not node_desc.drop then
+		node_desc.drop = base_node_name
+	end
 	local slope_name = natural_slopes.get_inner_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	-- Set recipes
-	minetest.register_craft({
-			output = slope_name .. ' 6',
-			recipe = {
-				{"", base_node_name, ""},
-				{base_node_name, "", base_node_name},
-				{base_node_name, base_node_name, base_node_name},
-		},
-	})
-	minetest.register_craft({
-		output = base_node_name .. ' 4',
-		recipe = {
-			{slope_name, slope_name},
-			{slope_name, slope_name},
-		},
-	})
+
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
@@ -214,24 +176,12 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
+	if not node_desc.drop then
+		node_desc.drop = base_node_name
+	end
 	local slope_name = natural_slopes.get_outer_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	-- Set recipes
-	minetest.register_craft({
-			output = slope_name .. ' 4',
-			recipe = {
-				{"", "", ""},
-				{"", base_node_name, ""},
-				{base_node_name, base_node_name, base_node_name},
-		},
-	})
-	minetest.register_craft({
-		output = base_node_name .. ' 4',
-		recipe = {
-			{slope_name, slope_name},
-			{slope_name, slope_name},
-		},
-	})
+
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
 		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',

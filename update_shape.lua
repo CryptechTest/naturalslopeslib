@@ -239,3 +239,28 @@ if natural_slopes.setting_enable_shape_on_generation() then
 	end)
 end
 
+--- On place neighbor update
+local function on_place_or_dig(pos)
+	local function update(pos, x, y, z)
+		local new_pos = vector.add(pos, vector.new(x, y, z))
+		natural_slopes.chance_update_shape(new_pos, minetest.get_node(new_pos))
+	end
+	-- Update 8 neighbors plus above and below
+	update(pos, 0, 0, 0)
+	update(pos, 1, 0, 0)
+	update(pos, 0, 0, 1)
+	update(pos, -1, 0, 0)
+	update(pos, 0, 0, -1)
+	update(pos, 1, 0, 1)
+	update(pos, 1, 0, -1)
+	update(pos, -1, 0, 1)
+	update(pos, -1, 0, -1)
+	update(pos, 0, -1, 0)
+	update(pos, 0, 1, 0)
+end
+
+if natural_slopes.setting_enable_shape_on_dig_place() then
+	minetest.register_on_placenode(function(pos, new_node, placer, old_node, item_stack, pointed_thing) on_place_or_dig(pos) end)
+	minetest.register_on_dignode(function(pos, old_node, digger) on_place_or_dig(pos) end)
+end
+

@@ -47,6 +47,11 @@ end
 function natural_slopes.setting_generation_factor()
 	return tonumber(minetest.setting_get('natural_slopes.update_shape_generate_factor')) or 0.01
 end
+function natural_slopes.setting_enable_shape_on_dig_place()
+	local value = minetest.setting_getbool('natural_slopes.enable_shape_on_dig_place')
+	if value == nil then value = true end
+	return value
+end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods

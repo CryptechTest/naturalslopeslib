@@ -21,7 +21,9 @@ natural_slopes.register_slope("default:dirt_with_grass", {
 	tiles = {"default_grass.png"},
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.25},
-	})},
+	}),
+	drop = "default:dirt",
+	},
 	50
 )
 natural_slopes.register_slope("default:dirt_with_dry_grass", {
@@ -31,7 +33,9 @@ natural_slopes.register_slope("default:dirt_with_dry_grass", {
 	drop = 'default:dirt',
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.4},
-	})},
+	}),
+	drop = "default:dirt",
+	},
 	25
 )
 natural_slopes.register_slope("default:dirt_with_snow", {
@@ -41,7 +45,9 @@ natural_slopes.register_slope("default:dirt_with_snow", {
 	drop = 'default:dirt',
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_snow_footstep", gain = 0.15},
-	})},
+	}),
+	drop = "default:dirt",
+	},
 	50
 )
 natural_slopes.register_slope("default:dirt_with_rainforest_litter", {
@@ -51,7 +57,9 @@ natural_slopes.register_slope("default:dirt_with_rainforest_litter", {
 	drop = "default:dirt",
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.4},
-	})},
+	}),
+	drop = "default:dirt",
+	},
 	15
 )
 
