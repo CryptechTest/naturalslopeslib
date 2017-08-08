@@ -95,7 +95,7 @@ function natural_slopes.area_chance_update_shape(minp, maxp, factor)
 	end
 	vm:set_data(data)
 	vm:set_param2_data(param2_data)
-	vm:write_to_map(false)
+	vm:write_to_map()
 end
 
 --- Try to update the shape of a node according to it's surroundings.

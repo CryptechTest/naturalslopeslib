@@ -121,6 +121,7 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	node_desc.mesh = SLOPE_MESH
 	node_desc.selection_box = slope_straight_box
 	node_desc.collision_box = slope_straight_box
+	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
@@ -164,6 +165,7 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 	node_desc.mesh = INNER_CORNER_MESH
 	node_desc.selection_box = slope_inner_corner_box
 	node_desc.collision_box = slope_inner_corner_box
+	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
@@ -207,6 +209,7 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	node_desc.mesh = OUTER_CORNER_MESH
 	node_desc.selection_box = slope_outer_corner_box
 	node_desc.collision_box = slope_outer_corner_box
+	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
 	if not node_desc.groups then node_desc.groups = {} end
