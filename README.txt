@@ -1,24 +1,25 @@
 Natural slopes
 
-Version 0.4
+Version 0.5
 Licence LGPLv2 and WTFPL, see LICENSE for the details
 Dependencies: default
 Optional dependencies:
+  default: to enable slopes for Minetest Game
   stairs: to enable blockish rendering
   poschangelib: to enable shape update on walk
 
-This mod adds some stair-like nodes from soft ground nodes (sand, dirt, gravel...)
-that may update shape according their surroundings.
+This mod add the ability for given nodes to turn into slopes and back to full block
+shape by itself according to the surroundings and the material hardness. It creates
+natural landscape and smoothes movements.
 
-The aim of this mod is to make a visual improvement on the world with more curves and
-smooth movement not to jump on every little height.
+Slopes can be generated in various ways. Those events can be turned on or off in
+settings. The shape is updated on generation, with time, by stepping on edges or
+when digging and placing nodes.
 
-It is also part of a larger project that aims to bring life to the environment from
-inanimate things (and without turning them into evil unfriendly mobs).
+It can be used either with Minetest Game or as a library for other games.
 
 As Minetest main unit is the block, having half-sized blocks can break a lot of things.
-Thus half-blocks like slopes are still considered as a single block (either for recipes
-or for placing items). A single slop can turn back to a full node and vice-versa and
+Thus half-blocks like slopes are still considered as a single block. A single slop can turn back to a full node and vice-versa and
 half-blocks are not considered buildable upon (they will transform back into full block)
 
 
