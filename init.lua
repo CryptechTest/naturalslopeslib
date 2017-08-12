@@ -12,6 +12,9 @@ end
 function natural_slopes.get_outer_corner_slope_name(subname)
 	return 'natural_slopes:slope_outer_' .. subname
 end
+function natural_slopes.get_pike_slope_name(subname)
+	return 'natural_slopes:slope_pike_' .. subname
+end
 
 -- Set functions to get configuration and default values
 function natural_slopes.setting_rendering_mode()

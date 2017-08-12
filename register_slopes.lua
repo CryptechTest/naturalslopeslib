@@ -8,16 +8,19 @@ local function add_replacement(source_name, update_chance)
 	local straight_name = natural_slopes.get_straight_slope_name(subname)
 	local ic_name = natural_slopes.get_inner_corner_slope_name(subname)
 	local oc_name = natural_slopes.get_outer_corner_slope_name(subname)
+	local pike_name = natural_slopes.get_pike_slope_name(subname)
 	local source_id = minetest.get_content_id(source_name)
 	local straight_id = minetest.get_content_id(straight_name)
 	local ic_id = minetest.get_content_id(ic_name)
 	local oc_id = minetest.get_content_id(oc_name)
+	local pike_id = minetest.get_content_id(pike_name)
 	-- Full to slopes
 	local dest_data = {
 		source = source_name,
 		straight = straight_name,
 		inner = ic_name,
 		outer = oc_name,
+		pike = pike_name,
 		chance = update_chance
 	}
 	local dest_data_id = {
@@ -25,6 +28,7 @@ local function add_replacement(source_name, update_chance)
 		straight = straight_id,
 		inner = ic_id,
 		outer = oc_id,
+		pike = pike_id,
 		chance = update_chance
 	}
 	-- Block
@@ -39,6 +43,9 @@ local function add_replacement(source_name, update_chance)
 	-- Outer
 	replacements[oc_name] = dest_data
 	replacement_ids[oc_id] = dest_data_id
+	-- Pike
+	replacements[pike_name] = dest_data
+	replacement_ids[pike_id] = dest_data_id
 end
 
 --- Get replacement description of a node.
@@ -83,15 +90,23 @@ local slope_outer_corner_box = {
 		{-0.5, 0, 0, 0, 0.5, 0.5},
 	},
 }
+local slope_pike_box = {
+	type = "fixed",
+	fixed = {
+		{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+	},
+}
 
 -- Set mesh constants according to settings
 local SLOPE_MESH = "twelve-twelve.obj"
 local INNER_CORNER_MESH = "twelve-twelve-ic.obj"
 local OUTER_CORNER_MESH = "twelve-twelve-oc.obj"
+local PIKE_MESH = "natural_slopes_pike.obj"
 if natural_slopes.setting_rendering_mode() == 1 then
 	SLOPE_MESH = "stairs_stair.obj"
 	INNER_CORNER_MESH = "stairs_stair_inner.obj"
 	OUTER_CORNER_MESH = "stairs_stair_outer.obj"
+	PIKE_MESH = "natural_slopes_pike_c.obj"
 end
 
 --- {Private} Register a straight slope and link to the original node.
@@ -190,6 +205,29 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	end
 end
 
+local function register_slope_pike(base_node_name, node_desc, update_chance)
+	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+	node_desc.drawtype = "mesh"
+	node_desc.mesh = PIKE_MESH
+	node_desc.selection_box = slope_pike_box
+	node_desc.collision_box = slope_pike_box
+	node_desc.paramtype = 'light'
+	node_desc.is_ground_content = true
+	if not node_desc.groups then node_desc.groups = {} end
+	node_desc.groups.natural_slope = 1
+	if not node_desc.drop then
+		node_desc.drop = base_node_name
+	end
+	local slope_name = natural_slopes.get_pike_slope_name(subname)
+	minetest.register_node(slope_name, node_desc)
+	-- Register walk listener
+	if natural_slopes.setting_enable_shape_on_walk() then
+		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+			natural_slopes.update_shape_on_walk,
+			{slope_name})
+	end
+end
+
 local function table_copy(table)
 	local orig_type = type(table)
 	local copy = {}
@@ -220,6 +258,8 @@ function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 	register_slope_inner(base_node_name, local_desc, update_chance)
 	local_desc = table_copy(node_desc)
 	register_slope_outer(base_node_name, local_desc, update_chance)
+	local_desc = table_copy(node_desc)
+	register_slope_pike(base_node_name, local_desc, update_chance)
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if natural_slopes.setting_enable_shape_on_walk() then

@@ -15,6 +15,9 @@ function natural_slopes.select_and_replace(slope_type, name, pos, pointing)
 	if slope_type == 'block' and replacement.source then
 		minetest.set_node(pos, {name=replacement.source})
 		return true
+	elseif slope_type == 'pike' and replacement.pike then
+		minetest.set_node(pos, {name=replacement.pike})
+		return true
 	elseif slope_type == 'straight' and replacement.straight then
 		dest_node_name = replacement.straight
 	elseif slope_type == 'ic' and replacement.inner then
@@ -33,8 +36,12 @@ function natural_slopes.area_select_and_replace(slope_type, data, param2_data, i
 	local replacement = natural_slopes.get_replacement_id(id)
 	if not replacement then return false end
 	local dest_node_id = nil
+	local paramtype2 = nil
 	if slope_type == 'block' and replacement.source then
 		data[index] = replacement.source
+		return true
+	elseif slope_type == 'pike' and replacement.pike then
+		data[index] = replacement.pike
 		return true
 	elseif slope_type == 'straight' and replacement.straight then
 		dest_node_id = replacement.straight
@@ -143,8 +150,9 @@ function natural_slopes.update_shape(pos, node, area, data, param2_data)
 	for index, free in next, {airXP, airXM, airZP, airZM} do
 		if free then free_neighbors = free_neighbors + 1 end
 	end
-	-- For four free neighbors, poof (spread so much it disappear)
-	if free_neighbors == 4 then -- minetest.set_node(pos, {name = 'air'})
+	-- For four free neighbors, pike
+	if free_neighbors == 4 then
+		return select_replace('pike', node_name, pos)
 	-- For three free neighbors, put a straight slope
 	elseif free_neighbors == 3 then
 		local dir = 0
