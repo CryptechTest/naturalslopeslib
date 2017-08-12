@@ -67,11 +67,11 @@ function natural_slopes.area_is_free_for_erosion(area, data, index)
 end
 
 -- Do shape update when random roll passes.
-function natural_slopes.chance_update_shape(pos, node)
+function natural_slopes.chance_update_shape(pos, node, factor)
+	if factor == nil then factor = 1 end
 	local replacement = natural_slopes.get_replacement(node.name)
 	if not replacement then return false end
-	local chance = replacement.chance
-	if (math.random() * chance) < 1.0 then
+	if (math.random() * (replacement.chance * factor)) < 1.0 then
 		return natural_slopes.update_shape(pos, node)
 	end
 	return false
@@ -240,10 +240,10 @@ if natural_slopes.setting_enable_shape_on_generation() then
 end
 
 --- On place neighbor update
-local function on_place_or_dig(pos)
-	local function update(pos, x, y, z)
+local function on_place_or_dig(pos, force_below)
+	local function update(pos, x, y, z, factor)
 		local new_pos = vector.add(pos, vector.new(x, y, z))
-		natural_slopes.chance_update_shape(new_pos, minetest.get_node(new_pos))
+		natural_slopes.chance_update_shape(new_pos, minetest.get_node(new_pos), factor)
 	end
 	-- Update 8 neighbors plus above and below
 	update(pos, 0, 0, 0)
@@ -255,12 +255,18 @@ local function on_place_or_dig(pos)
 	update(pos, 1, 0, -1)
 	update(pos, -1, 0, 1)
 	update(pos, -1, 0, -1)
-	update(pos, 0, -1, 0)
+	if force_below then update(pos, 0, -1, 0, 0)
+	else update(pos, 0, -1, 0)
+	end
 	update(pos, 0, 1, 0)
 end
 
 if natural_slopes.setting_enable_shape_on_dig_place() then
-	minetest.register_on_placenode(function(pos, new_node, placer, old_node, item_stack, pointed_thing) on_place_or_dig(pos) end)
-	minetest.register_on_dignode(function(pos, old_node, digger) on_place_or_dig(pos) end)
+	minetest.register_on_placenode(function(pos, new_node, placer, old_node, item_stack, pointed_thing)
+		on_place_or_dig(pos, true)
+	end)
+	minetest.register_on_dignode(function(pos, old_node, digger)
+		on_place_or_dig(pos)
+	end)
 end
 
