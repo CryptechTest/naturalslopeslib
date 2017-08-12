@@ -1,7 +1,7 @@
 Natural slopes
 
-Version 0.5
-Licence LGPLv2 and WTFPL, see LICENSE for the details
+Version 0.6
+Licence LGPLv2 or any later, CC-0 and WTFPL, see LICENSE for the details.
 Dependencies: default
 Optional dependencies:
   default: to enable slopes for Minetest Game

@@ -1,7 +1,9 @@
--- Code adapted from the stairs modules
--- License: GNU Lesser General Public License, version 2
+-- Code written under GNU Lesser General Public Licence, version 2,
+-- or, at your discretion, any later version.
+-- With thanks to all modders, mainly from the stairs mod for study.
 
--- Models taken from myroof module
+-- natural_slopes_* models under CC-0
+
+-- twelve_* taken from myroof module
 -- DO WHAT YOU WANT TO PUBLIC LICENSE
 
--- New code written under GNU Lesser General Public Licence, version 2
