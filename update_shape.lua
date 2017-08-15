@@ -87,18 +87,31 @@ end
 -- @param minp Lower boundary of area.
 -- @param mapx Higher boundary of area.
 -- @param factor Factor for chance (0.1 means 10 times more likely to update)
-function natural_slopes.area_chance_update_shape(minp, maxp, factor)
+-- @param skip (optional) Don't parse all nodes, skip randomly skip/2 to skip nodes
+-- at every loop.
+function natural_slopes.area_chance_update_shape(minp, maxp, factor, skip)
+	if not skip then skip = 0 end
 	-- Run on every block
 	local vm, emin, emax = minetest.get_voxel_manip()
 	local e1, e2 = vm:read_from_map(minp, maxp)
 	local area = VoxelArea:new{MinEdge = e1, MaxEdge = e2}
 	local data = vm:get_data()
 	local param2_data = vm:get_param2_data()
-	for i in area:iterp(vector.add(minp, 1), vector.add(maxp, -1)) do
-		local replacement = natural_slopes.get_replacement_id(data[i])
-		if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
-			natural_slopes.update_shape(i, data[i], area, data, param2_data)
+	local i = area:indexp(e1)
+	local imax = area:indexp(e2)
+	while i <= imax do
+		local x = (i-1) % area.ystride
+		local y = (i-1) % area.zstride
+		if x == 0 or x == area.ystride - 1
+		or y == 0 or y == area.zstride - 1 then
+			-- Continue, this is the edge and it cannot check neighbors
+		else
+			local replacement = natural_slopes.get_replacement_id(data[i])
+			if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
+				natural_slopes.update_shape(i, data[i], area, data, param2_data)
+			end
 		end
+		i = i + 1 + math.random(skip / 2, skip)
 	end
 	vm:set_data(data)
 	vm:set_param2_data(param2_data)
@@ -150,32 +163,22 @@ function natural_slopes.update_shape(pos, node, area, data, param2_data)
 	for index, free in next, {airXP, airXM, airZP, airZM} do
 		if free then free_neighbors = free_neighbors + 1 end
 	end
-	-- For four free neighbors, pike
-	if free_neighbors == 4 then
+	-- For four or three free neighbors, pike (slab)
+	if free_neighbors == 4 or free_neighbors == 3 then
 		return select_replace('pike', node_name, pos)
-	-- For three free neighbors, put a straight slope
-	elseif free_neighbors == 3 then
-		local dir = 0
-		if not airXP then dir = {x=1, y=0, z=0}
-		elseif not airXM then dir = {x=-1, y=0, z=0}
-		elseif not airZP then dir = {x=0, y=0, z=-1}
-		elseif not airZM then dir = {x=0, y=0, z=1}
-		end
-		return select_replace('straight', node_name, pos, dir)
 	-- For two free neighbors
 	elseif free_neighbors == 2 then
 		-- at opposite sides, block
-		if (airXP and airXM and not airZP and not airZM)
-			or (not airXP and not airXM and airZP and airZM) then
+		if (airXP and airXM) or (airZP and airZM) then
 			return select_replace('block', node_name, pos)
 		-- side by side, outer corner
-		elseif (airXP and not airXM and airZP and not airZM) then
+		elseif (airXP and airZP) then
 			return select_replace('oc', node_name, pos, {x=0, y=0, z=1})
-		elseif (airXP and not airXM and not airZP and airZM) then
+		elseif (airXP and airZM) then
 			return select_replace('oc', node_name, pos, {x=-1, y=0, z=0})
-		elseif (not airXP and airXM and airZP and not airZM) then
+		elseif (airXM and airZP) then
 			return select_replace('oc', node_name, pos, {x=1, y=0, z=0})
-		elseif (not airXP and airXM and not airZP and airZM) then
+		elseif (airXM and airZM) then
 			return select_replace('oc', node_name, pos, {x=0, y=0, z=-1})
 		end
 	-- For one free neighbor, straight slope
@@ -208,15 +211,32 @@ function natural_slopes.update_shape(pos, node, area, data, param2_data)
 	end
 end
 
-
+-- Register the ABM-like
 if natural_slopes.setting_enable_shape_abm() then
-	minetest.register_abm({
-		label = 'slope sliding',
-		nodenames = {'group:falling_node', 'group:falling_natural_slope'},
-		interval = natural_slopes.setting_update_shape_abm_interval(),
-		chance = 1,
-		action = natural_slopes.chance_update_shape,
-	})
+	local upd_timer = 0
+	local upd_interval = natural_slopes.setting_update_shape_abm_interval()
+	minetest.register_globalstep(function (dtime)
+		upd_timer = upd_timer + dtime
+		if upd_timer >= upd_interval then
+			-- Take one player at random
+			local players = minetest.get_connected_players()
+			if #players == 0 then return end -- players not loaded yet
+			local picked = players[math.random(1, #players)]
+			-- Take a random position around
+			local pos = picked:getpos()
+			if not pos then return end -- player not positioned yet
+			pos.y = pos.y + math.random(-32, 32)
+			pos.x = pos.x + math.random(-48, 48)
+			pos.z = pos.z + math.random(-48, 48)
+			-- Get an area around that random position
+			local min_pos = vector.add(pos, vector.new(math.random(-32, 0), -8, -32))
+			local max_pos = vector.add(pos, vector.new(32, 8, 32))
+			-- Update the area
+			natural_slopes.area_chance_update_shape(min_pos, max_pos,
+				natural_slopes.setting_update_shape_abm_skip())
+			upd_timer = 0
+		end
+	end)
 end
 
 
@@ -243,7 +263,8 @@ minetest.register_chatcommand('updshape', {
 -- On generation big update
 if natural_slopes.setting_enable_shape_on_generation() then
 	minetest.register_on_generated(function(minp, maxp, seed)
-		natural_slopes.area_chance_update_shape(minp, maxp, natural_slopes.setting_generation_factor())
+		natural_slopes.area_chance_update_shape(minp, maxp, natural_slopes.setting_generation_factor(),
+			natural_slopes.setting_generation_skip())
 	end)
 end
 

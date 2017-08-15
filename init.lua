@@ -25,6 +25,9 @@ end
 function natural_slopes.setting_update_shape_abm_interval()
 	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_interval')) or 30
 end
+function natural_slopes.setting_update_shape_abm_skip()
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_skip')) or 16
+end
 function natural_slopes.setting_enable_shape_on_walk()
 	if not _G.poschangelib then return false end
 	local value = minetest.setting_getbool('natural_slopes.enable_shape_on_walk')
@@ -43,7 +46,10 @@ function natural_slopes.setting_enable_shape_on_generation()
 	return value
 end
 function natural_slopes.setting_generation_factor()
-	return tonumber(minetest.setting_get('natural_slopes.update_shape_generate_factor')) or 0.01
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_generate_factor')) or 0.05
+end
+function natural_slopes.setting_generation_skip()
+	return tonumber(minetest.setting_get('natural_slopes.update_shape_generate_skip')) or 0
 end
 function natural_slopes.setting_enable_shape_on_dig_place()
 	local value = minetest.setting_getbool('natural_slopes.enable_shape_on_dig_place')

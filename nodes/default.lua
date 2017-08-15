@@ -1,7 +1,5 @@
 --[[
-This is where all the new nodes are registered.
-The group natural_slope will be added to all of the new nodes.
-The group falling_natural_slope will be added to the new nodes that have falling_node.
+Add natural slopes to Minetest Game
 --]]
 
 -- Dirt slopes

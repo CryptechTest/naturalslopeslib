@@ -1,12 +1,15 @@
 ## Update shape ABM
 
-# Enable or disable the ABM responsible of updating the shape of slopes at regular interval.
+# Enable or disable the ABM-like responsible of updating the shape of nodes at regular interval.
 natural_slopes.enable_shape_abm (Enable automatic shape update) bool true
 
-# The ABM will run on every block every X seconds.
+# The ABM-like will run on an area every X seconds.
 # The lower the value, the smoother the update will be but it will cost more server resources.
-natural_slopes.update_shape_abm_interval (Automatic shape update interval) int 30 0
+# Reduce this number and increase skip if you want to speed up things without introducing much lag.
+natural_slopes.update_shape_abm_interval (Automatic shape update interval) int 10 0
 
+# Skip n nodes when updating an area. The higher, the less nodes can be updated at once but it dramatically saves server resources.
+natural_slopes.update_shape_abm_skip (Automatic shape skip nodes) int 16 0
 
 ## Update shape on walk
 
@@ -24,11 +27,15 @@ natural_slopes.register_default_slopes (Register slopes for default nodes) bool 
 ## Update shape on world generation
 
 # Enable or disable shape update when the world is generated.
+# This will probably put a lot of pressure on the server. Hopefully it doesn't happen that frequently.
 natural_slopes.enable_shape_on_generate (Shape update on generation) bool true
 
 # Inverted chance factor on generation. The lesser, the more likely the node will be
 # generated in their updated shape. 0.1 means 10 time more likely.
-natural_slopes.update_shape_generate_factor (Generation factor) float 0.001 0
+natural_slopes.update_shape_generate_factor (Generation factor) float 0.05 0
+
+# Skip n nodes when generating an area. The higher, the less nodes can be updated but it dramatically saves server resources.
+natural_slopes.update_shape_generate_skip (Generation skip nodes) int 0 0
 
 ## Update shape on dig and place
 
