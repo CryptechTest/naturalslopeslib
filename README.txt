@@ -1,11 +1,12 @@
 Natural slopes
 
-Version 0.6
-Licence LGPLv2 or any later, CC-0 and WTFPL, see LICENSE for the details.
-Dependencies: default
+Version 0.7
+Licence LGPLv2 or, at your discretion, any later version.
+With thanks to all modders, mainly from the stairs mod for study.
+
+Dependencies: none
 Optional dependencies:
   default: to enable slopes for Minetest Game
-  stairs: to enable blockish rendering
   poschangelib: to enable shape update on walk
 
 This mod add the ability for given nodes to turn into slopes and back to full block
@@ -19,8 +20,9 @@ when digging and placing nodes.
 It can be used either with Minetest Game or as a library for other games.
 
 As Minetest main unit is the block, having half-sized blocks can break a lot of things.
-Thus half-blocks like slopes are still considered as a single block. A single slop can turn back to a full node and vice-versa and
-half-blocks are not considered buildable upon (they will transform back into full block)
+Thus half-blocks like slopes are still considered as a single block. A single slope
+can turn back to a full node and vice-versa and half-blocks are not considered
+buildable upon (they will transform back into full block).
 
 
 How to define new slopes
