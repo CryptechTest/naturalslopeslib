@@ -1,1 +1,1 @@
-Add stair-like slopes for natural ground and make falling blocks erode and slide.
+The landscape shapes itself by handling soft and hard edges. Nothing is lost nor created in the process.
