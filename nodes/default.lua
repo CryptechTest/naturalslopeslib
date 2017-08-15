@@ -108,3 +108,32 @@ natural_slopes.register_slope("default:gravel", {
 	7
 )
 
+natural_slopes.register_slope("default:clay", {
+	description = "Clay slope",
+	tiles = {"default_clay.png"},
+	groups = {crumbly = 3},
+	drop = 'default:clay_lump 4',
+	sounds = default.node_sound_dirt_defaults()},
+	8
+)
+
+natural_slopes.register_slope("default:snowblock", {
+	description = "Snow Block slope",
+	tiles = {"default_snow.png"},
+	groups = {crumbly = 3, puts_out_fire = 1, cools_lava = 1, snowy = 1},
+	sounds = default.node_sound_dirt_defaults({
+		footstep = {name = "default_snow_footstep", gain = 0.15},
+		dug = {name = "default_snow_footstep", gain = 0.2},
+		dig = {name = "default_snow_footstep", gain = 0.2}
+	}),
+
+	on_construct = function(pos)
+		pos.y = pos.y - 1
+		if minetest.get_node(pos).name == "default:dirt_with_grass" then
+			minetest.set_node(pos, {name = "default:dirt_with_snow"})
+		end
+	end,
+	},
+	5
+)
+
