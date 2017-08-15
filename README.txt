@@ -35,3 +35,15 @@ It takes 3 arguments
              for the new nodes.
   update_chance: inverted chance to the node to update it's shape when an update event
                  occurs on it.
+
+node_desc can accept a dedicated tiles definition which holds top, bottom, front, back
+and side instead of the default list.
+
+Top refers to the top faces, where the player walks.
+Bottom to the opposite faces. When not set it is the same as top.
+Front refers to the vertical faces between the horizontal ones. When not set it is the
+same as top. Those are always visible except the lower ones.
+Side refers to the vertical faces at the boundaries on the sides of the node. When not
+set it is the same as front. Those are often hidden by neighbor blocks
+Back refers to the vertical face at the back of the node. When not set is it the same
+as side. Those are hidden most of the time.

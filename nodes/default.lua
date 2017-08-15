@@ -18,7 +18,11 @@ natural_slopes.register_slope("default:dirt", {
 natural_slopes.register_slope("default:dirt_with_grass", {
 	description = "Dirt with Grass slope",
 	groups = {crumbly = 3, soil = 1},
-	tiles = {"default_grass.png"},
+	tiles = {top = "default_grass.png",
+		bottom = "default_dirt.png",
+		front = "default_grass.png",
+		side = {name = "default_dirt.png^default_grass_side.png",
+			tileable_vertical = false}},
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.25},
 	}),
@@ -28,7 +32,11 @@ natural_slopes.register_slope("default:dirt_with_grass", {
 )
 natural_slopes.register_slope("default:dirt_with_dry_grass", {
 	description = "Dirt with Dry Grass slope",
-	tiles = {"default_dry_grass.png"},
+	tiles = {top = "default_dry_grass.png",
+		bottom = "default_dirt.png",
+		front = "default_dry_grass.png",
+		side = {name = "default_dirt.png^default_dry_grass_side.png",
+			tileable_vertical = false}},
 	groups = {crumbly = 3, soil = 1},
 	drop = 'default:dirt',
 	sounds = default.node_sound_dirt_defaults({
@@ -40,7 +48,11 @@ natural_slopes.register_slope("default:dirt_with_dry_grass", {
 )
 natural_slopes.register_slope("default:dirt_with_snow", {
 	description = "Dirt with Snow slope",
-	tiles = {"default_snow.png"},
+	tiles = {top = "default_snow.png",
+		bottom = "default_dirt.png",
+		front = "default_snow.png",
+		side = {name = "default_dirt.png^default_snow_side.png",
+			tileable_vertical = false}},
 	groups = {crumbly = 3, snowy = 1},
 	drop = 'default:dirt',
 	sounds = default.node_sound_dirt_defaults({
@@ -52,7 +64,11 @@ natural_slopes.register_slope("default:dirt_with_snow", {
 )
 natural_slopes.register_slope("default:dirt_with_rainforest_litter", {
 	description = "Dirt with Rainforest Litter slope",
-	tiles = {"default_rainforest_litter.png"},
+	tiles = {top = "default_rainforest_litter.png",
+		bottom = "default_dirt.png",
+		front = "default_rainforest_litter.png",
+		side = {name = "default_dirt.png^default_rainforest_litter_side.png",
+			tileable_vertical = false}},
 	groups = {crumbly = 3, soil = 1},
 	drop = "default:dirt",
 	sounds = default.node_sound_dirt_defaults({

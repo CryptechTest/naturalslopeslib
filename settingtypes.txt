@@ -1,10 +1,3 @@
-## Rendering
-
-# Set the appearance of slopes.
-# 0: show smooth slopes
-# 1: show stair-like slopes (requires stairs mod)
-natural_slopes.rendering_mode (Slope rendering mode) int 1 0 1
-
 ## Update shape ABM
 
 # Enable or disable the ABM responsible of updating the shape of slopes at regular interval.

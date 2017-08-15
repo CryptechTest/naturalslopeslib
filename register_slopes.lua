@@ -62,10 +62,6 @@ function natural_slopes.get_replacement_id(source_id)
 end
 
 --[[ Bounding boxes
-Even with a slope model, we use a stair bounding box because it is less costly
-and is more bugproof that a precise box (sometime the player get stuck while trying
-to climb the slope).
-Moreover it can be sufficient.
 --]]
 
 local slope_straight_box = {
@@ -97,35 +93,34 @@ local slope_pike_box = {
 	},
 }
 
--- Set mesh constants according to settings
-local SLOPE_MESH = "twelve-twelve.obj"
-local INNER_CORNER_MESH = "twelve-twelve-ic.obj"
-local OUTER_CORNER_MESH = "twelve-twelve-oc.obj"
-local PIKE_MESH = "natural_slopes_pike.obj"
-if natural_slopes.setting_rendering_mode() == 1 then
-	SLOPE_MESH = "stairs_stair.obj"
-	INNER_CORNER_MESH = "stairs_stair_inner.obj"
-	OUTER_CORNER_MESH = "stairs_stair_outer.obj"
-	PIKE_MESH = "natural_slopes_pike_c.obj"
+local function tile_get(tiles, side)
+	if side == 'top' then return tiles.top end
+	if side == 'bottom' then return tiles.bottom or tiles.top end
+	if side == 'front' then return tiles.front or tiles.top end
+	if side == 'side' then return tiles.side or tiles.front or tiles.top end
+	if side == 'back' then return tiles.back or tiles.side or tiles.front or tiles.top end
 end
 
 --- {Private} Register a straight slope and link to the original node.
--- @param subname: The name passed to natural_slopes.get_straigth_slope_name
--- @param base_node_name: The full block node name.
--- @param groups: The groups that the slope node will have.
--- @param images:
--- @param descriptions: Description of the new slope node.
--- @param sounds:
 local function register_slope_straight(base_node_name, node_desc, update_chance)
 	-- Register slope node
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = "mesh"
-	node_desc.mesh = SLOPE_MESH
+	node_desc.drawtype = 'nodebox'
+	node_desc.node_box = slope_straight_box
 	node_desc.selection_box = slope_straight_box
 	node_desc.collision_box = slope_straight_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
+	if node_desc.tiles and node_desc.tiles.top then
+		local tiles = {tile_get(node_desc.tiles, 'top')}
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'side')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'side')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		node_desc.tiles = tiles
+	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
 	if not node_desc.drop then
@@ -142,21 +137,24 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 end
 
 --- {Private} Register an inner corner and link to the original node.
--- @param subname: The name passed to natural_slopes.get_straigth_inner_corner_name
--- @param base_node_name: The full block node name.
--- @param groups: The groups that the slope node will have.
--- @param images:
--- @param descriptions: Description of the new slope node.
--- @param sounds:
 local function register_slope_inner(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = "mesh"
-	node_desc.mesh = INNER_CORNER_MESH
+	node_desc.drawtype = 'nodebox'
+	node_desc.node_box = slope_inner_corner_box
 	node_desc.selection_box = slope_inner_corner_box
 	node_desc.collision_box = slope_inner_corner_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
+	if node_desc.tiles and node_desc.tiles.top then
+		local tiles = {tile_get(node_desc.tiles, 'top')}
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		node_desc.tiles = tiles
+	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
 	if not node_desc.drop then
@@ -174,21 +172,24 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 end
 
 --- {Private} Register an outer corner and link to the original node.
--- @param subname: The name passed to natural_slopes.get_straigth_inner_corner_name
--- @param base_node_name: The full block node name.
--- @param groups: The groups that the slope node will have.
--- @param images:
--- @param descriptions: Description of the new slope node.
--- @param sounds:
 local function register_slope_outer(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = "mesh"
-	node_desc.mesh = OUTER_CORNER_MESH
+	node_desc.drawtype = 'nodebox'
+	node_desc.node_box = slope_outer_corner_box
 	node_desc.selection_box = slope_outer_corner_box
 	node_desc.collision_box = slope_outer_corner_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
 	node_desc.is_ground_content = true
+	if node_desc.tiles and node_desc.tiles.top then
+		local tiles = {tile_get(node_desc.tiles, 'top')}
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		node_desc.tiles = tiles
+	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
 	if not node_desc.drop then
@@ -205,14 +206,24 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	end
 end
 
+--- {Private} Register a pike and link to the original node.
 local function register_slope_pike(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = "mesh"
-	node_desc.mesh = PIKE_MESH
+	node_desc.drawtype = 'nodebox'
+	node_desc.node_box = slope_pike_box
 	node_desc.selection_box = slope_pike_box
 	node_desc.collision_box = slope_pike_box
 	node_desc.paramtype = 'light'
 	node_desc.is_ground_content = true
+	if node_desc.tiles and node_desc.tiles.top then
+		local tiles = {tile_get(node_desc.tiles, 'top')}
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
+		node_desc.tiles = tiles
+	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
 	if not node_desc.drop then
@@ -239,12 +250,9 @@ local function table_copy(table)
 end
 
 --- Register slopes from a full block node.
--- @param subname: The name passed to natural_slopes.get_*_name
 -- @param base_node_name: The full block node name.
--- @param groups: The groups that the slope nodes will have.
--- @param images:
--- @param descriptions: Description of the new slope node.
--- @param sounds:
+-- @param node_desc: base for slope node descriptions.
+-- @param update_chance: inverted chance for the node to be updated.
 function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 	if not update_chance then
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)

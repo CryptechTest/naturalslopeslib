@@ -17,11 +17,6 @@ function natural_slopes.get_pike_slope_name(subname)
 end
 
 -- Set functions to get configuration and default values
-function natural_slopes.setting_rendering_mode()
-	local mode = tonumber(minetest.setting_get('natural_slopes.rendering_mode')) or 0
-	if mode == 1 and not _G.stairs then mode = 0 end
-	return mode
-end
 function natural_slopes.setting_enable_shape_abm()
 	local value = minetest.setting_getbool('natural_slopes.enable_shape_abm')
 	if value == nil then return true end
