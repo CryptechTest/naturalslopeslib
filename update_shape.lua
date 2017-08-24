@@ -228,12 +228,37 @@ if natural_slopes.setting_enable_shape_abm() then
 			pos.y = pos.y + math.random(-32, 32)
 			pos.x = pos.x + math.random(-48, 48)
 			pos.z = pos.z + math.random(-48, 48)
-			-- Get an area around that random position
-			local min_pos = vector.add(pos, vector.new(math.random(-32, 0), -8, -32))
-			local max_pos = vector.add(pos, vector.new(32, 8, 32))
-			-- Update the area
-			natural_slopes.area_chance_update_shape(min_pos, max_pos,
-				natural_slopes.setting_update_shape_abm_skip())
+			local rand_pos = vector.new(pos.x, pos.y, pos.z)
+			-- Get to the surface
+			local i = 0
+			local node = minetest.get_node(rand_pos)
+			local found_surface = false
+			if node.name == 'air' then
+				-- Get down to the surface
+				while i < 64 and not found_surface do
+					rand_pos = vector.add(rand_pos, vector.new(0, -1, 0))
+					node = minetest.get_node(rand_pos)
+					i = i + 1
+					found_surface = node.name ~= 'air'
+				end
+			else
+				-- Try to get up to the surface
+				while i < 64 and not found_surface do
+					local up_pos = vector.add(rand_pos, vector.new(0, 1, 0))
+					local up_node = minetest.get_node(up_pos)
+					i = i + 1
+					if up_node.name == 'air' then
+						found_surface = true
+						node = minetest.get_node(rand_pos)
+					else
+						rand_pos = up_pos
+					end
+				end
+			end
+			-- Update the surface node
+			if found_surface then
+				natural_slopes.chance_update_shape(rand_pos, node)
+			end
 			upd_timer = 0
 		end
 	end)

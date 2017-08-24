@@ -18,15 +18,12 @@ end
 
 -- Set functions to get configuration and default values
 function natural_slopes.setting_enable_shape_abm()
-	local value = minetest.setting_getbool('natural_slopes.enable_shape_abm')
+	local value = minetest.setting_getbool('natural_slopes.enable_surface_update')
 	if value == nil then return true end
 	return value
 end
 function natural_slopes.setting_update_shape_abm_interval()
-	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_interval')) or 30
-end
-function natural_slopes.setting_update_shape_abm_skip()
-	return tonumber(minetest.setting_get('natural_slopes.update_shape_abm_skip')) or 16
+	return tonumber(minetest.setting_get('natural_slopes.surface_update_interval')) or 5.0
 end
 function natural_slopes.setting_enable_shape_on_walk()
 	if not _G.poschangelib then return false end

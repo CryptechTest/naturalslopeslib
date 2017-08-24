@@ -1,15 +1,10 @@
 ## Update shape ABM
 
-# Enable or disable the ABM-like responsible of updating the shape of nodes at regular interval.
-natural_slopes.enable_shape_abm (Enable automatic shape update) bool true
+# Enable or disable the automatic update of the shape of nodes at the surface.
+natural_slopes.enable_surface_update (Timed surface update) bool true
 
-# The ABM-like will run on an area every X seconds.
-# The lower the value, the smoother the update will be but it will cost more server resources.
-# Reduce this number and increase skip if you want to speed up things without introducing much lag.
-natural_slopes.update_shape_abm_interval (Automatic shape update interval) int 10 0
-
-# Skip n nodes when updating an area. The higher, the less nodes can be updated at once but it dramatically saves server resources.
-natural_slopes.update_shape_abm_skip (Automatic shape skip nodes) int 16 0
+# The surface update will check one surface node every X seconds.
+natural_slopes.surface_update_interval (Timed surface update interval) float 5.0 0
 
 ## Update shape on walk
 
