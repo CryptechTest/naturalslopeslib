@@ -2,22 +2,24 @@
 Describes the falling/eroding effect for slopes
 --]]
 
+--[[
+Pick replacement, node and area
+--]]
+
 --- {Private} Pick a replacement node and set it at pos.
 -- @param type The replacement shape. Either 'block', 'straight', 'ic' or 'oc'
 -- @param name The name of the node to replace.
 -- @param pos The position of the node to replace
 -- @param pointing Optional vector to orient the new node.
 -- @return True if the node is replaced, false otherwise.
-function natural_slopes.select_and_replace(slope_type, name, pos, pointing)
+local function pick_replacement(slope_type, name, pos, pointing)
 	local replacement = natural_slopes.get_replacement(name)
-	if not replacement then return false end
+	if not replacement then return nil end
 	local dest_node_name = nil
 	if slope_type == 'block' and replacement.source then
-		minetest.set_node(pos, {name=replacement.source})
-		return true
+		return {name=replacement.source}
 	elseif slope_type == 'pike' and replacement.pike then
-		minetest.set_node(pos, {name=replacement.pike})
-		return true
+		return {name=replacement.pike}
 	elseif slope_type == 'straight' and replacement.straight then
 		dest_node_name = replacement.straight
 	elseif slope_type == 'ic' and replacement.inner then
@@ -26,23 +28,21 @@ function natural_slopes.select_and_replace(slope_type, name, pos, pointing)
 		dest_node_name = replacement.outer
 	end
 	if dest_node_name then
-		minetest.set_node(pos, {name = dest_node_name, paramtype2='facedir',
-			param2=minetest.dir_to_facedir(pointing)})
-		return true
+		return {name = dest_node_name, paramtype2='facedir',
+			param2=minetest.dir_to_facedir(pointing)}
 	end
-	return false
+	return nil
 end
-function natural_slopes.area_select_and_replace(slope_type, data, param2_data, id, index, pointing)
+
+local function area_pick_replacement(slope_type, data, param2_data, id, index, pointing)
 	local replacement = natural_slopes.get_replacement_id(id)
 	if not replacement then return false end
 	local dest_node_id = nil
 	local paramtype2 = nil
 	if slope_type == 'block' and replacement.source then
-		data[index] = replacement.source
-		return true
+		return {id = replacement.source}
 	elseif slope_type == 'pike' and replacement.pike then
-		data[index] = replacement.pike
-		return true
+		return {id = replacement.pike}
 	elseif slope_type == 'straight' and replacement.straight then
 		dest_node_id = replacement.straight
 	elseif slope_type == 'ic' and replacement.inner then
@@ -51,12 +51,16 @@ function natural_slopes.area_select_and_replace(slope_type, data, param2_data, i
 		dest_node_id = replacement.outer
 	end
 	if dest_node_id then
-		data[index] = dest_node_id
-		param2_data[index] = minetest.dir_to_facedir(pointing)
-		return true
+		return {id = dest_node_id,
+			param2_data = minetest.dir_to_facedir(pointing)}
 	end
-	return false
+	return nil
 end
+
+
+--[[
+Surrounding checks and get replacement
+--]]
 
 --- Check if a node is considered empty to switch shape.
 -- @param pos The position to check
@@ -73,7 +77,108 @@ function natural_slopes.area_is_free_for_erosion(area, data, index)
 	return false
 end
 
--- Do shape update when random roll passes.
+
+--- Get the replacement node according to it's surroundings.
+-- @param pos The position of the node or index with VoxelArea.
+-- @param node The node at that position or content id with VoxelArea.
+-- @param area The VoxelArea, nil for single position update.
+-- @param data Data from VoxelManip, nil for single position update.
+-- @param param2_data Param2 data from VoxelManip, nil for single position update.
+-- @return A node to use with minetest.set_node
+-- or a table with id and param2_data if called with an area.
+-- Nil if no replacement is found.
+function natural_slopes.get_replacement_node(pos, node, area, data, param2_data)
+	-- Set functions and data according to update mode: single or VoxelManip
+	local is_free = nil
+	local new_pos = nil
+	local replacement = nil
+	local node_name = nil -- Either name or id
+	if area then
+		is_free = function (at_index) -- always use with new_pos
+			return natural_slopes.area_is_free_for_erosion(area, data, at_index)
+		end
+		new_pos = function(add) -- Get new index from current with add position
+			local area_pos = area:position(pos)
+			return area:indexp(vector.add(area_pos, add))
+		end
+		replacement = function(slope_type, name, pos, pointing)
+			return area_pick_replacement(slope_type,
+				data, param2_data, name, pos, pointing)
+		end
+		node_name = node
+	else
+		is_free = natural_slopes.is_free_for_erosion
+		new_pos = function(add) return vector.add(pos, add) end
+		replacement = pick_replacement
+		node_name = node.name
+	end
+	-- If there's something above, get back to full block
+	if not is_free(new_pos({x=0, y=1, z=0})) then
+		return replacement('block', node_name, pos)
+	end
+	-- Check blocks around
+	local airXP = is_free(new_pos({x=1, y=0, z=0}))
+	local airXM = is_free(new_pos({x=-1, y=0, z=0}))
+	local airZP = is_free(new_pos({x=0, y=0, z=-1}))
+	local airZM = is_free(new_pos({x=0, y=0, z=1}))
+	local free_neighbors = 0
+	for index, free in next, {airXP, airXM, airZP, airZM} do
+		if free then free_neighbors = free_neighbors + 1 end
+	end
+	-- For four or three free neighbors, pike (slab)
+	if free_neighbors == 4 or free_neighbors == 3 then
+		return replacement('pike', node_name, pos)
+	-- For two free neighbors
+	elseif free_neighbors == 2 then
+		-- at opposite sides, block
+		if (airXP and airXM) or (airZP and airZM) then
+			return replacement('block', node_name, pos)
+		-- side by side, outer corner
+		elseif (airXP and airZP) then
+			return replacement('oc', node_name, pos, {x=0, y=0, z=1})
+		elseif (airXP and airZM) then
+			return replacement('oc', node_name, pos, {x=-1, y=0, z=0})
+		elseif (airXM and airZP) then
+			return replacement('oc', node_name, pos, {x=1, y=0, z=0})
+		elseif (airXM and airZM) then
+			return replacement('oc', node_name, pos, {x=0, y=0, z=-1})
+		end
+	-- For one free neighbor, straight slope
+	elseif free_neighbors == 1 then
+		local dir = 0
+		if airXP then dir = {x=-1, y=0, z=0}
+		elseif airXM then dir = {x=1, y=0, z=0}
+		elseif airZP then dir = {x=0, y=0, z=1}
+		elseif airZM then dir = {x=0, y=0, z=-1}
+		end
+		return replacement('straight', node_name, pos, dir)
+	-- For no free neighbor check for a free diagonal for an inner corner
+	-- or fully surrounded for a rebuild
+	else
+		local airXPZP = is_free(new_pos({x=1, y=0, z=1}))
+		local airXPZM = is_free(new_pos({x=1, y=0, z=-1}))
+		local airXMZP = is_free(new_pos({x=-1, y=0, z=1}))
+		local airXMZM = is_free(new_pos({x=-1, y=0, z=-1}))
+		if airXPZP and not airXPZM and not airXMZP and not airXMZM then
+			return replacement('ic', node_name, pos, {x=-1, y=0, z=0})
+		elseif not airXPZP and airXPZM and not airXMZP and not airXMZM then
+			return replacement('ic', node_name, pos, {x=0, y=0, z=1})
+		elseif not airXPZP and not airXPZM and airXMZP and not airXMZM then
+			return replacement('ic', node_name, pos, {x=0, y=0, z=-1})
+		elseif not airXPZP and not airXPZM and not airXMZP and airXMZM then
+			return replacement('ic', node_name, pos, {x=1, y=0, z=0})
+		else
+			return replacement('block', node_name, pos)
+		end
+	end
+end
+
+
+--[[
+Do the replacement
+--]]
+
+-- Do shape update when random roll passes on a single node.
 function natural_slopes.chance_update_shape(pos, node, factor)
 	if factor == nil then factor = 1 end
 	local replacement = natural_slopes.get_replacement(node.name)
@@ -83,6 +188,21 @@ function natural_slopes.chance_update_shape(pos, node, factor)
 	end
 	return false
 end
+
+--- Try to update the shape of a node according to it's surroundings.
+-- @param pos The position of the node.
+-- @param node The node at that position.
+-- @return True if the node was updated, false otherwise.
+function natural_slopes.update_shape(pos, node)
+	local replacement = natural_slopes.get_replacement_node(pos, node)
+	if replacement then
+		minetest.set_node(pos, replacement)
+		return true
+	else
+		return false
+	end
+end
+
 --- Massive shape update with VoxelManip.
 -- @param minp Lower boundary of area.
 -- @param mapx Higher boundary of area.
@@ -108,7 +228,13 @@ function natural_slopes.area_chance_update_shape(minp, maxp, factor, skip)
 		else
 			local replacement = natural_slopes.get_replacement_id(data[i])
 			if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
-				natural_slopes.update_shape(i, data[i], area, data, param2_data)
+				local new_data = natural_slopes.get_replacement_node(i, data[i], area, data, param2_data)
+				if new_data then
+					data[i] = new_data.id
+					if new_data.param2_data then
+						param2_data[i] = new_data.param2_data
+					end
+				end
 			end
 		end
 		i = i + 1 + math.random(skip / 2, skip)
@@ -118,103 +244,15 @@ function natural_slopes.area_chance_update_shape(minp, maxp, factor, skip)
 	vm:write_to_map()
 end
 
---- Try to update the shape of a node according to it's surroundings.
--- @param pos The position of the node or index with VoxelArea.
--- @param node The node at that position or content id with VoxelArea.
--- @param area The VoxelArea, nil for single position update.
--- @param data Data from VoxelManip, nil for single position update.
--- @param param2_data Param2 data from VoxelManip, nil for single position update.
--- @return True if the node was updated, false otherwise.
-function natural_slopes.update_shape(pos, node, area, data, param2_data)
-	-- Set functions and data according to update mode: single or VoxelManip
-	local is_free = nil
-	local new_pos = nil
-	local select_replace = nil
-	local node_name = nil -- Either name or id
-	if area then
-		is_free = function (at_index) -- always use with new_pos
-			return natural_slopes.area_is_free_for_erosion(area, data, at_index)
-		end
-		new_pos = function(add) -- Get new index from current with add position
-			local area_pos = area:position(pos)
-			return area:indexp(vector.add(area_pos, add))
-		end
-		select_replace = function(slope_type, name, pos, pointing)
-			return natural_slopes.area_select_and_replace(slope_type,
-				data, param2_data, name, pos, pointing)
-		end
-		node_name = node
-	else
-		is_free = natural_slopes.is_free_for_erosion
-		new_pos = function(add) return vector.add(pos, add) end
-		select_replace = natural_slopes.select_and_replace
-		node_name = node.name
-	end
-	-- If there's something above, get back to full block
-	if not is_free(new_pos({x=0, y=1, z=0})) then
-		return select_replace('block', node_name, pos)
-	end
-	-- Check blocks around
-	local airXP = is_free(new_pos({x=1, y=0, z=0}))
-	local airXM = is_free(new_pos({x=-1, y=0, z=0}))
-	local airZP = is_free(new_pos({x=0, y=0, z=-1}))
-	local airZM = is_free(new_pos({x=0, y=0, z=1}))
-	local free_neighbors = 0
-	for index, free in next, {airXP, airXM, airZP, airZM} do
-		if free then free_neighbors = free_neighbors + 1 end
-	end
-	-- For four or three free neighbors, pike (slab)
-	if free_neighbors == 4 or free_neighbors == 3 then
-		return select_replace('pike', node_name, pos)
-	-- For two free neighbors
-	elseif free_neighbors == 2 then
-		-- at opposite sides, block
-		if (airXP and airXM) or (airZP and airZM) then
-			return select_replace('block', node_name, pos)
-		-- side by side, outer corner
-		elseif (airXP and airZP) then
-			return select_replace('oc', node_name, pos, {x=0, y=0, z=1})
-		elseif (airXP and airZM) then
-			return select_replace('oc', node_name, pos, {x=-1, y=0, z=0})
-		elseif (airXM and airZP) then
-			return select_replace('oc', node_name, pos, {x=1, y=0, z=0})
-		elseif (airXM and airZM) then
-			return select_replace('oc', node_name, pos, {x=0, y=0, z=-1})
-		end
-	-- For one free neighbor, straight slope
-	elseif free_neighbors == 1 then
-		local dir = 0
-		if airXP then dir = {x=-1, y=0, z=0}
-		elseif airXM then dir = {x=1, y=0, z=0}
-		elseif airZP then dir = {x=0, y=0, z=1}
-		elseif airZM then dir = {x=0, y=0, z=-1}
-		end
-		return select_replace('straight', node_name, pos, dir)
-	-- For no free neighbor check for a free diagonal for an inner corner
-	-- or fully surrounded for a rebuild
-	else
-		local airXPZP = is_free(new_pos({x=1, y=0, z=1}))
-		local airXPZM = is_free(new_pos({x=1, y=0, z=-1}))
-		local airXMZP = is_free(new_pos({x=-1, y=0, z=1}))
-		local airXMZM = is_free(new_pos({x=-1, y=0, z=-1}))
-		if airXPZP and not airXPZM and not airXMZP and not airXMZM then
-			return select_replace('ic', node_name, pos, {x=-1, y=0, z=0})
-		elseif not airXPZP and airXPZM and not airXMZP and not airXMZM then
-			return select_replace('ic', node_name, pos, {x=0, y=0, z=1})
-		elseif not airXPZP and not airXPZM and airXMZP and not airXMZM then
-			return select_replace('ic', node_name, pos, {x=0, y=0, z=-1})
-		elseif not airXPZP and not airXPZM and not airXMZP and airXMZM then
-			return select_replace('ic', node_name, pos, {x=1, y=0, z=0})
-		else
-			return select_replace('block', node_name, pos)
-		end
-	end
-end
+
+--[[
+Triggers registration
+--]]
 
 -- Register the ABM-like
-if natural_slopes.setting_enable_shape_abm() then
+if natural_slopes.setting_enable_surface_update() then
 	local upd_timer = 0
-	local upd_interval = natural_slopes.setting_update_shape_abm_interval()
+	local upd_interval = natural_slopes.setting_surface_update_interval()
 	minetest.register_globalstep(function (dtime)
 		upd_timer = upd_timer + dtime
 		if upd_timer >= upd_interval then
@@ -264,12 +302,12 @@ if natural_slopes.setting_enable_shape_abm() then
 	end)
 end
 
-
---- Player movement callback, try to update shape on walk
-function natural_slopes.update_shape_on_walk(player, pos, node, node_desc)
-	natural_slopes.chance_update_shape(pos, node)
+-- Stomp function to get the replacement node name
+function natural_slopes.update_shape_on_walk(player, pos, node, desc, trigger_meta)
+	return natural_slopes.get_replacement_node(pos, node)
 end
 
+-- Chat command
 minetest.register_chatcommand('updshape', {
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)

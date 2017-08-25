@@ -128,11 +128,12 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	end
 	local slope_name = natural_slopes.get_straight_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
-	-- Register walk listener
+	-- Register stomp
 	if natural_slopes.setting_enable_shape_on_walk() then
-		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+		poschangelib.register_stomp(slope_name,
 			natural_slopes.update_shape_on_walk,
-			{slope_name})
+			{name = slope_name .. '_upd_shape',
+			chance = update_chance, priority = 500})
 	end
 end
 
@@ -165,9 +166,11 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
-		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+		poschangelib.register_stomp(slope_name,
 			natural_slopes.update_shape_on_walk,
-			{slope_name})
+			{name = slope_name .. '_upd_shape',
+			chance = update_chance, priority = 500})
+
 	end
 end
 
@@ -200,9 +203,10 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
-		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+		poschangelib.register_stomp(slope_name,
 			natural_slopes.update_shape_on_walk,
-			{slope_name})
+			{name = slope_name .. '_upd_shape',
+			chance = update_chance, priority = 500})
 	end
 end
 
@@ -233,9 +237,10 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 	minetest.register_node(slope_name, node_desc)
 	-- Register walk listener
 	if natural_slopes.setting_enable_shape_on_walk() then
-		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+		poschangelib.register_stomp(slope_name,
 			natural_slopes.update_shape_on_walk,
-			{slope_name})
+			{name = slope_name .. '_upd_shape',
+			chance = update_chance, priority = 500})
 	end
 end
 
@@ -271,9 +276,10 @@ function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if natural_slopes.setting_enable_shape_on_walk() then
-		poschangelib.add_player_walk_listener('natural_slopes:update_on_walk',
+		poschangelib.register_stomp(base_node_name,
 			natural_slopes.update_shape_on_walk,
-			{base_node_name})
+			{name = base_node_name .. '_upd_shape',
+			chance = update_chance, priority = 500})
 	end
 end
 
