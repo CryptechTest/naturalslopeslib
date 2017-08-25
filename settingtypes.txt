@@ -36,3 +36,10 @@ natural_slopes.update_shape_generate_skip (Generation skip nodes) int 0 0
 
 # Enable or disable shape update of neighbor nodes when one is placed or updated.
 natural_slopes.enable_shape_on_dig_place (Shape update on dig and place) bool true
+
+
+## Rendering
+
+# Enable smooth rendering instead of cubic. It will show some disconnections at some
+# points that won't be fixed and may be visually misleading with heights.
+natural_slopes.smooth_rendering (Smooth but glitched rendering) bool false

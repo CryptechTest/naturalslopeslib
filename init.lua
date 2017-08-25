@@ -53,6 +53,11 @@ function natural_slopes.setting_enable_shape_on_dig_place()
 	if value == nil then value = true end
 	return value
 end
+function natural_slopes.setting_smooth_rendering()
+	local value = minetest.setting_getbool('natural_slopes.smooth_rendering')
+	if value == nil then value = false end
+	return value
+end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods

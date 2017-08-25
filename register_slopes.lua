@@ -94,6 +94,10 @@ local slope_pike_box = {
 }
 
 local function tile_get(tiles, side)
+	if natural_slopes.setting_smooth_rendering()
+	and (side == 'front' or side == 'side' or side == 'back') then
+		return tiles.top
+	end
 	if side == 'top' then return tiles.top end
 	if side == 'bottom' then return tiles.bottom or tiles.top end
 	if side == 'front' then return tiles.front or tiles.top end
@@ -105,8 +109,13 @@ end
 local function register_slope_straight(base_node_name, node_desc, update_chance)
 	-- Register slope node
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = 'nodebox'
-	node_desc.node_box = slope_straight_box
+	if natural_slopes.setting_smooth_rendering() then
+		node_desc.drawtype = 'mesh'
+		node_desc.mesh = 'natural_slopes_straight.obj'
+	else
+		node_desc.drawtype = 'nodebox'
+		node_desc.node_box = slope_straight_box
+	end
 	node_desc.selection_box = slope_straight_box
 	node_desc.collision_box = slope_straight_box
 	node_desc.paramtype = 'light'
@@ -140,8 +149,13 @@ end
 --- {Private} Register an inner corner and link to the original node.
 local function register_slope_inner(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = 'nodebox'
-	node_desc.node_box = slope_inner_corner_box
+	if natural_slopes.setting_smooth_rendering() then
+		node_desc.drawtype = 'mesh'
+		node_desc.mesh = 'natural_slopes_inner.obj'
+	else
+		node_desc.drawtype = 'nodebox'
+		node_desc.node_box = slope_inner_corner_box
+	end
 	node_desc.selection_box = slope_inner_corner_box
 	node_desc.collision_box = slope_inner_corner_box
 	node_desc.paramtype = 'light'
@@ -177,8 +191,13 @@ end
 --- {Private} Register an outer corner and link to the original node.
 local function register_slope_outer(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = 'nodebox'
-	node_desc.node_box = slope_outer_corner_box
+	if natural_slopes.setting_smooth_rendering() then
+		node_desc.drawtype = 'mesh'
+		node_desc.mesh = 'natural_slopes_outer.obj'
+	else
+		node_desc.drawtype = 'nodebox'
+		node_desc.node_box = slope_outer_corner_box
+	end
 	node_desc.selection_box = slope_outer_corner_box
 	node_desc.collision_box = slope_outer_corner_box
 	node_desc.paramtype = 'light'
@@ -213,8 +232,13 @@ end
 --- {Private} Register a pike and link to the original node.
 local function register_slope_pike(base_node_name, node_desc, update_chance)
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
-	node_desc.drawtype = 'nodebox'
-	node_desc.node_box = slope_pike_box
+	if natural_slopes.setting_smooth_rendering() then
+		node_desc.drawtype = 'mesh'
+		node_desc.mesh = 'natural_slopes_pike.obj'
+	else
+		node_desc.drawtype = 'nodebox'
+		node_desc.node_box = slope_pike_box
+	end
 	node_desc.selection_box = slope_pike_box
 	node_desc.collision_box = slope_pike_box
 	node_desc.paramtype = 'light'
