@@ -1,8 +1,9 @@
 Natural slopes
 
-Version 0.7
+Version 0.8
 Licence LGPLv2 or, at your discretion, any later version.
 With thanks to all modders, mainly from the stairs mod for study.
+Models licensed under CC-0.
 
 Dependencies: none
 Optional dependencies:
@@ -46,6 +47,6 @@ Bottom to the opposite faces. When not set it is the same as top.
 Front refers to the vertical faces between the horizontal ones. When not set it is the
 same as top. Those are always visible except the lower ones.
 Side refers to the vertical faces at the boundaries on the sides of the node. When not
-set it is the same as front. Those are often hidden by neighbor blocks
+set it is the same as front. Those are often hidden by neighbour blocks.
 Back refers to the vertical face at the back of the node. When not set is it the same
 as side. Those are hidden most of the time.
