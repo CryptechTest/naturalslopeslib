@@ -96,13 +96,20 @@ local slope_pike_box = {
 local function tile_get(tiles, side)
 	if natural_slopes.setting_smooth_rendering()
 	and (side == 'front' or side == 'side' or side == 'back') then
-		return tiles.top
+		return {name = tiles.top, backface_culling = true}
 	end
-	if side == 'top' then return tiles.top end
-	if side == 'bottom' then return tiles.bottom or tiles.top end
-	if side == 'front' then return tiles.front or tiles.top end
-	if side == 'side' then return tiles.side or tiles.front or tiles.top end
-	if side == 'back' then return tiles.back or tiles.side or tiles.front or tiles.top end
+	local tile = nil
+	if side == 'top' then tile = tiles.top end
+	if side == 'bottom' then tile = (tiles.bottom or tiles.top) end
+	if side == 'front' then tile = (tiles.front or tiles.top) end
+	if side == 'side' then tile = (tiles.side or tiles.front or tiles.top) end
+	if side == 'back' then tile = (tiles.back or tiles.side or tiles.front or tiles.top) end
+	if type(tile) == 'table' then
+		tile.backface_culling = true
+	else
+		tile = {name = tile, backface_culling = true}
+	end
+	return tile
 end
 
 --- {Private} Register a straight slope and link to the original node.
