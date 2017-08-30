@@ -26,7 +26,7 @@ natural_slopes.register_slope("default:dirt_with_grass", {
 	}),
 	drop = "default:dirt",
 	},
-	50
+	25
 )
 natural_slopes.register_slope("default:dirt_with_dry_grass", {
 	description = "Dirt with Dry Grass slope",
@@ -42,7 +42,7 @@ natural_slopes.register_slope("default:dirt_with_dry_grass", {
 	}),
 	drop = "default:dirt",
 	},
-	25
+	20
 )
 natural_slopes.register_slope("default:dirt_with_snow", {
 	description = "Dirt with Snow slope",
@@ -58,7 +58,7 @@ natural_slopes.register_slope("default:dirt_with_snow", {
 	}),
 	drop = "default:dirt",
 	},
-	50
+	25
 )
 natural_slopes.register_slope("default:dirt_with_rainforest_litter", {
 	description = "Dirt with Rainforest Litter slope",
@@ -134,6 +134,6 @@ natural_slopes.register_slope("default:snowblock", {
 		end
 	end,
 	},
-	5
+	20
 )
 
