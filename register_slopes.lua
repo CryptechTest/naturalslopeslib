@@ -3,12 +3,23 @@
 -- Populated on slope node registration with add_replacement
 local replacements = {}
 local replacement_ids = {}
-local function add_replacement(source_name, update_chance)
+local function add_replacement(source_name, update_chance, fixed_replacements)
 	local subname = string.sub(source_name, string.find(source_name, ':') + 1)
-	local straight_name = natural_slopes.get_straight_slope_name(subname)
-	local ic_name = natural_slopes.get_inner_corner_slope_name(subname)
-	local oc_name = natural_slopes.get_outer_corner_slope_name(subname)
-	local pike_name = natural_slopes.get_pike_slope_name(subname)
+	local straight_name = nil
+	local ic_name = nil
+	local oc_name = nil
+	local pike_name = nil
+	if fixed_replacements then
+		straight_name = fixed_replacements[1]
+		ic_name = fixed_replacements[2]
+		oc_name = fixed_replacements[3]
+		pike_name = fixed_replacements[4]
+	else
+		straight_name = natural_slopes.get_straight_slope_name(subname)
+		ic_name = natural_slopes.get_inner_corner_slope_name(subname)
+		oc_name = natural_slopes.get_outer_corner_slope_name(subname)
+		pike_name = natural_slopes.get_pike_slope_name(subname)
+	end
 	local source_id = minetest.get_content_id(source_name)
 	local straight_id = minetest.get_content_id(straight_name)
 	local ic_id = minetest.get_content_id(ic_name)
@@ -60,6 +71,19 @@ end
 function natural_slopes.get_replacement_id(source_id)
 	return replacement_ids[source_id]
 end
+
+--- Get the list of slope names for a given node.
+-- @return [straight, inner, outer, pike] node names,
+-- nil if no slopes are registered.
+function natural_slopes.get_slope_names(node_name)
+	if replacements[node_name] then
+		local rep = replacements[node_name]
+		return {rep.straight, rep.inner, rep.outer, rep.pike}
+	else
+		return nil
+	end
+end
+
 
 --[[ Bounding boxes
 --]]
@@ -151,6 +175,7 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 			{name = slope_name .. '_upd_shape',
 			chance = update_chance, priority = 500})
 	end
+	return slope_name
 end
 
 --- {Private} Register an inner corner and link to the original node.
@@ -178,7 +203,7 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 		node_desc.tiles = tiles
 	end
 	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 1
+	node_desc.groups.natural_slope = 2
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
@@ -193,6 +218,7 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 			chance = update_chance, priority = 500})
 
 	end
+	return slope_name
 end
 
 --- {Private} Register an outer corner and link to the original node.
@@ -220,7 +246,7 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 		node_desc.tiles = tiles
 	end
 	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 1
+	node_desc.groups.natural_slope = 3
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
@@ -234,6 +260,7 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 			{name = slope_name .. '_upd_shape',
 			chance = update_chance, priority = 500})
 	end
+	return slope_name
 end
 
 --- {Private} Register a pike and link to the original node.
@@ -260,7 +287,7 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 		node_desc.tiles = tiles
 	end
 	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 1
+	node_desc.groups.natural_slope = 4
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
@@ -273,6 +300,7 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 			{name = slope_name .. '_upd_shape',
 			chance = update_chance, priority = 500})
 	end
+	return slope_name
 end
 
 local function table_copy(table)
@@ -289,6 +317,7 @@ end
 -- @param base_node_name: The full block node name.
 -- @param node_desc: base for slope node descriptions.
 -- @param update_chance: inverted chance for the node to be updated.
+-- @return Table of slope names: [straight, inner, outer, pike] or nil on error.
 function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 	if not update_chance then
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
@@ -296,14 +325,15 @@ function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 	end
 	-- Use a copy because tables are passed by reference. Otherwise the node
 	-- description is shared and updated even after minetest.register_node
+	local names = {}
 	local local_desc = table_copy(node_desc)
-	register_slope_straight(base_node_name, local_desc, update_chance)
+	table.insert(names, register_slope_straight(base_node_name, local_desc, update_chance))
 	local_desc = table_copy(node_desc)
-	register_slope_inner(base_node_name, local_desc, update_chance)
+	table.insert(names, register_slope_inner(base_node_name, local_desc, update_chance))
 	local_desc = table_copy(node_desc)
-	register_slope_outer(base_node_name, local_desc, update_chance)
+	table.insert(names, register_slope_outer(base_node_name, local_desc, update_chance))
 	local_desc = table_copy(node_desc)
-	register_slope_pike(base_node_name, local_desc, update_chance)
+	table.insert(names, register_slope_pike(base_node_name, local_desc, update_chance))
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if natural_slopes.setting_enable_shape_on_walk() then
@@ -311,6 +341,43 @@ function natural_slopes.register_slope(base_node_name, node_desc, update_chance)
 			natural_slopes.update_shape_on_walk,
 			{name = base_node_name .. '_upd_shape',
 			chance = update_chance, priority = 500})
+	end
+	return names
+end
+
+--- Add a slopping behaviour to existing nodes.
+function natural_slopes.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance)
+	-- Defensive checks
+	if not minetest.registered_nodes[base_node_name] then
+		if not base_node_name then
+			minetest.log('error', 'natural_slopes.set_slopes failed: base node_name is nil.')
+		else
+			minetest.log('error', 'natural_slopes.set_slopes failed: ' .. base_node_name .. ' is not registered.')
+		end
+		return
+	end
+	if not minetest.registered_nodes[straight_name]
+	or not minetest.registered_nodes[inner_name]
+	or not minetest.registered_nodes[outer_name]
+	or not minetest.registered_nodes[pike_name] then
+		minetest.log('error', 'natural_slopes.set_slopes failed: one of the slopes for ' .. base_node_name .. ' is not registered.')
+		return
+	end
+	if not update_chance then
+		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
+		return
+	end
+	-- Set shape update data
+	local slope_names = {straight_name, inner_name, outer_name, pike_name}
+	add_replacement(base_node_name, update_chance, slope_names)
+	-- Set walk listener for the 5 nodes
+	if natural_slopes.setting_enable_shape_on_walk() then
+		local stomp_desc = {name = base_node_name .. '_upd_shape',
+			chance = update_chance, priority = 500}
+		poschangelib.register_stomp(base_node_name, natural_slopes.update_shape_on_walk, stomp_desc)
+		for i, name in pairs(slope_names) do
+			poschangelib.register_stomp(name, natural_slopes.update_shape_on_walk, stomp_desc)
+		end
 	end
 end
 
