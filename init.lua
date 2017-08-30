@@ -4,16 +4,16 @@ natural_slopes = {}
 --- Get node name for slopes from a subname.
 -- For example 'dirt' will be named 'natural_slopes:slope_dirt'
 function natural_slopes.get_straight_slope_name(subname)
-	return 'natural_slopes:slope_' .. subname
+	return minetest.get_current_modname() .. ':slope_' .. subname
 end
 function natural_slopes.get_inner_corner_slope_name(subname)
-	return 'natural_slopes:slope_inner_' .. subname
+	return minetest.get_current_modname() .. ':slope_inner_' .. subname
 end
 function natural_slopes.get_outer_corner_slope_name(subname)
-	return 'natural_slopes:slope_outer_' .. subname
+	return minetest.get_current_modname() .. ':slope_outer_' .. subname
 end
 function natural_slopes.get_pike_slope_name(subname)
-	return 'natural_slopes:slope_pike_' .. subname
+	return minetest.get_current_modname() .. ':slope_pike_' .. subname
 end
 
 -- Set functions to get configuration and default values
