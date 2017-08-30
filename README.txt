@@ -1,6 +1,6 @@
 Natural slopes
 
-Version 0.8
+Version 0.9
 Licence LGPLv2 or, at your discretion, any later version.
 With thanks to all modders, mainly from the stairs mod for study.
 Models licensed under CC-0.
