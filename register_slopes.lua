@@ -78,7 +78,11 @@ end
 function natural_slopes.get_slope_names(node_name)
 	if replacements[node_name] then
 		local rep = replacements[node_name]
-		return {rep.straight, rep.inner, rep.outer, rep.pike}
+		return {straight = rep.straight,
+			inner = rep.inner,
+			outer = rep.outer,
+			pike = rep.pike
+		}
 	else
 		return nil
 	end
