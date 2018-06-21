@@ -1,54 +1,54 @@
 -- Global namespace for functions
-natural_slopes = {}
+naturalslopeslib = {}
 
 --- Get node name for slopes from a subname.
--- For example 'dirt' will be named 'natural_slopes:slope_dirt'
-function natural_slopes.get_straight_slope_name(subname)
+-- For example 'dirt' will be named 'naturalslopeslib:slope_dirt'
+function naturalslopeslib.get_straight_slope_name(subname)
 	return minetest.get_current_modname() .. ':slope_' .. subname
 end
-function natural_slopes.get_inner_corner_slope_name(subname)
+function naturalslopeslib.get_inner_corner_slope_name(subname)
 	return minetest.get_current_modname() .. ':slope_inner_' .. subname
 end
-function natural_slopes.get_outer_corner_slope_name(subname)
+function naturalslopeslib.get_outer_corner_slope_name(subname)
 	return minetest.get_current_modname() .. ':slope_outer_' .. subname
 end
-function natural_slopes.get_pike_slope_name(subname)
+function naturalslopeslib.get_pike_slope_name(subname)
 	return minetest.get_current_modname() .. ':slope_pike_' .. subname
 end
 
 -- Set functions to get configuration and default values
-function natural_slopes.setting_enable_surface_update()
-	local value = minetest.settings:get_bool('natural_slopes.enable_surface_update')
+function naturalslopeslib.setting_enable_surface_update()
+	local value = minetest.settings:get_bool('naturalslopeslib.enable_surface_update')
 	if value == nil then return true end
 	return value
 end
-function natural_slopes.setting_surface_update_interval()
-	return tonumber(minetest.settings:get('natural_slopes.surface_update_interval')) or 5.0
+function naturalslopeslib.setting_surface_update_interval()
+	return tonumber(minetest.settings:get('naturalslopeslib.surface_update_interval')) or 5.0
 end
-function natural_slopes.setting_enable_shape_on_walk()
+function naturalslopeslib.setting_enable_shape_on_walk()
 	if not _G.poschangelib then return false end
-	local value = minetest.settings:get_bool('natural_slopes.enable_shape_on_walk')
+	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_walk')
 	if value == nil then return true end
 	return value
 end
-function natural_slopes.setting_enable_shape_on_generation()
-	local value = minetest.settings:get_bool('natural_slopes.register_default_slopes')
+function naturalslopeslib.setting_enable_shape_on_generation()
+	local value = minetest.settings:get_bool('naturalslopeslib.register_default_slopes')
 	if value == nil then value = true end
 	return value
 end
-function natural_slopes.setting_generation_factor()
-	return tonumber(minetest.settings:get('natural_slopes.update_shape_generate_factor')) or 0.05
+function naturalslopeslib.setting_generation_factor()
+	return tonumber(minetest.settings:get('naturalslopeslib.update_shape_generate_factor')) or 0.05
 end
-function natural_slopes.setting_generation_skip()
-	return tonumber(minetest.settings:get('natural_slopes.update_shape_generate_skip')) or 0
+function naturalslopeslib.setting_generation_skip()
+	return tonumber(minetest.settings:get('naturalslopeslib.update_shape_generate_skip')) or 0
 end
-function natural_slopes.setting_enable_shape_on_dig_place()
-	local value = minetest.settings:get_bool('natural_slopes.enable_shape_on_dig_place')
+function naturalslopeslib.setting_enable_shape_on_dig_place()
+	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_dig_place')
 	if value == nil then value = true end
 	return value
 end
-function natural_slopes.setting_smooth_rendering()
-	local value = minetest.settings:get_bool('natural_slopes.smooth_rendering')
+function naturalslopeslib.setting_smooth_rendering()
+	local value = minetest.settings:get_bool('naturalslopeslib.smooth_rendering')
 	if value == nil then value = false end
 	return value
 end

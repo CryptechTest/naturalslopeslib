@@ -13,7 +13,7 @@ Pick replacement, node and area
 -- @param pointing Optional vector to orient the new node.
 -- @return True if the node is replaced, false otherwise.
 local function pick_replacement(slope_type, name, pos, pointing)
-	local replacement = natural_slopes.get_replacement(name)
+	local replacement = naturalslopeslib.get_replacement(name)
 	if not replacement then return nil end
 	local dest_node_name = nil
 	if slope_type == 'block' and replacement.source then
@@ -35,7 +35,7 @@ local function pick_replacement(slope_type, name, pos, pointing)
 end
 
 local function area_pick_replacement(slope_type, data, param2_data, id, index, pointing)
-	local replacement = natural_slopes.get_replacement_id(id)
+	local replacement = naturalslopeslib.get_replacement_id(id)
 	if not replacement then return false end
 	local dest_node_id = nil
 	local paramtype2 = nil
@@ -64,14 +64,14 @@ Surrounding checks and get replacement
 
 --- Check if a node is considered empty to switch shape.
 -- @param pos The position to check
-function natural_slopes.is_free_for_erosion(pos)
+function naturalslopeslib.is_free_for_shape_update(pos)
 	if not pos then return false end
 	if minetest.get_node(pos).name == 'air' then return true end
 	-- TODO add water for canditates
 	return false
 end
 local air_id = minetest.get_content_id('air')
-function natural_slopes.area_is_free_for_erosion(area, data, index)
+function naturalslopeslib.area_is_free_for_erosion(area, data, index)
 	if not area:containsi(index) then return false end
 	if data[index] == air_id then return true end
 	return false
@@ -87,7 +87,7 @@ end
 -- @return A node to use with minetest.set_node
 -- or a table with id and param2_data if called with an area.
 -- Nil if no replacement is found.
-function natural_slopes.get_replacement_node(pos, node, area, data, param2_data)
+function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_data)
 	-- Set functions and data according to update mode: single or VoxelManip
 	local is_free = nil
 	local new_pos = nil
@@ -95,7 +95,7 @@ function natural_slopes.get_replacement_node(pos, node, area, data, param2_data)
 	local node_name = nil -- Either name or id
 	if area then
 		is_free = function (at_index) -- always use with new_pos
-			return natural_slopes.area_is_free_for_erosion(area, data, at_index)
+			return naturalslopeslib.area_is_free_for_erosion(area, data, at_index)
 		end
 		new_pos = function(add) -- Get new index from current with add position
 			local area_pos = area:position(pos)
@@ -107,7 +107,7 @@ function natural_slopes.get_replacement_node(pos, node, area, data, param2_data)
 		end
 		node_name = node
 	else
-		is_free = natural_slopes.is_free_for_erosion
+		is_free = naturalslopeslib.is_free_for_shape_update
 		new_pos = function(add) return vector.add(pos, add) end
 		replacement = pick_replacement
 		node_name = node.name
@@ -179,12 +179,12 @@ Do the replacement
 --]]
 
 -- Do shape update when random roll passes on a single node.
-function natural_slopes.chance_update_shape(pos, node, factor)
+function naturalslopeslib.chance_update_shape(pos, node, factor)
 	if factor == nil then factor = 1 end
-	local replacement = natural_slopes.get_replacement(node.name)
+	local replacement = naturalslopeslib.get_replacement(node.name)
 	if not replacement then return false end
 	if (math.random() * (replacement.chance * factor)) < 1.0 then
-		return natural_slopes.update_shape(pos, node)
+		return naturalslopeslib.update_shape(pos, node)
 	end
 	return false
 end
@@ -193,8 +193,8 @@ end
 -- @param pos The position of the node.
 -- @param node The node at that position.
 -- @return True if the node was updated, false otherwise.
-function natural_slopes.update_shape(pos, node)
-	local replacement = natural_slopes.get_replacement_node(pos, node)
+function naturalslopeslib.update_shape(pos, node)
+	local replacement = naturalslopeslib.get_replacement_node(pos, node)
 	if replacement then
 		minetest.set_node(pos, replacement)
 		return true
@@ -209,7 +209,7 @@ end
 -- @param factor Factor for chance (0.1 means 10 times more likely to update)
 -- @param skip (optional) Don't parse all nodes, skip randomly skip/2 to skip nodes
 -- at every loop.
-function natural_slopes.area_chance_update_shape(minp, maxp, factor, skip)
+function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
 	if not skip then skip = 0 end
 	-- Run on every block
 	local vm, emin, emax = minetest.get_voxel_manip()
@@ -226,9 +226,9 @@ function natural_slopes.area_chance_update_shape(minp, maxp, factor, skip)
 		or y == 0 or y == area.zstride - 1 then
 			-- Continue, this is the edge and it cannot check neighbors
 		else
-			local replacement = natural_slopes.get_replacement_id(data[i])
+			local replacement = naturalslopeslib.get_replacement_id(data[i])
 			if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
-				local new_data = natural_slopes.get_replacement_node(i, data[i], area, data, param2_data)
+				local new_data = naturalslopeslib.get_replacement_node(i, data[i], area, data, param2_data)
 				if new_data then
 					data[i] = new_data.id
 					if new_data.param2_data then
@@ -250,9 +250,9 @@ Triggers registration
 --]]
 
 -- Register the ABM-like
-if natural_slopes.setting_enable_surface_update() then
+if naturalslopeslib.setting_enable_surface_update() then
 	local upd_timer = 0
-	local upd_interval = natural_slopes.setting_surface_update_interval()
+	local upd_interval = naturalslopeslib.setting_surface_update_interval()
 	minetest.register_globalstep(function (dtime)
 		upd_timer = upd_timer + dtime
 		if upd_timer >= upd_interval then
@@ -295,7 +295,7 @@ if natural_slopes.setting_enable_surface_update() then
 			end
 			-- Update the surface node
 			if found_surface then
-				natural_slopes.chance_update_shape(rand_pos, node)
+				naturalslopeslib.chance_update_shape(rand_pos, node)
 			end
 			upd_timer = 0
 		end
@@ -303,8 +303,8 @@ if natural_slopes.setting_enable_surface_update() then
 end
 
 -- Stomp function to get the replacement node name
-function natural_slopes.update_shape_on_walk(player, pos, node, desc, trigger_meta)
-	return natural_slopes.get_replacement_node(pos, node)
+function naturalslopeslib.update_shape_on_walk(player, pos, node, desc, trigger_meta)
+	return naturalslopeslib.get_replacement_node(pos, node)
 end
 
 -- Chat command
@@ -316,7 +316,7 @@ minetest.register_chatcommand('updshape', {
 		local pos = player:getpos()
 		local node_pos = {['x'] = pos.x, ['y'] = pos.y - 1, ['z'] = pos.z}
 		local node = minetest.get_node(node_pos)
-		if natural_slopes.update_shape(node_pos, node) then
+		if naturalslopeslib.update_shape(node_pos, node) then
 			return true, 'Shape updated.'
 		end
 		return false, node.name .. " cannot have it's shape updated."
@@ -324,10 +324,10 @@ minetest.register_chatcommand('updshape', {
 })
 
 -- On generation big update
-if natural_slopes.setting_enable_shape_on_generation() then
+if naturalslopeslib.setting_enable_shape_on_generation() then
 	minetest.register_on_generated(function(minp, maxp, seed)
-		natural_slopes.area_chance_update_shape(minp, maxp, natural_slopes.setting_generation_factor(),
-			natural_slopes.setting_generation_skip())
+		naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(),
+			naturalslopeslib.setting_generation_skip())
 	end)
 end
 
@@ -335,7 +335,7 @@ end
 local function on_place_or_dig(pos, force_below)
 	local function update(pos, x, y, z, factor)
 		local new_pos = vector.add(pos, vector.new(x, y, z))
-		natural_slopes.chance_update_shape(new_pos, minetest.get_node(new_pos), factor)
+		naturalslopeslib.chance_update_shape(new_pos, minetest.get_node(new_pos), factor)
 	end
 	-- Update 8 neighbors plus above and below
 	update(pos, 0, 0, 0)
@@ -353,7 +353,7 @@ local function on_place_or_dig(pos, force_below)
 	update(pos, 0, 1, 0)
 end
 
-if natural_slopes.setting_enable_shape_on_dig_place() then
+if naturalslopeslib.setting_enable_shape_on_dig_place() then
 	minetest.register_on_placenode(function(pos, new_node, placer, old_node, item_stack, pointed_thing)
 		on_place_or_dig(pos, true)
 	end)
