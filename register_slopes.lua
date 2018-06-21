@@ -72,22 +72,6 @@ function naturalslopeslib.get_replacement_id(source_id)
 	return replacement_ids[source_id]
 end
 
---- Get the list of slope names for a given node.
--- @return [straight, inner, outer, pike] node names,
--- nil if no slopes are registered.
-function naturalslopeslib.get_slope_names(node_name)
-	if replacements[node_name] then
-		local rep = replacements[node_name]
-		return {straight = rep.straight,
-			inner = rep.inner,
-			outer = rep.outer,
-			pike = rep.pike
-		}
-	else
-		return nil
-	end
-end
-
 
 --[[ Bounding boxes
 --]]
