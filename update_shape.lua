@@ -261,7 +261,7 @@ if naturalslopeslib.setting_enable_surface_update() then
 			if #players == 0 then return end -- players not loaded yet
 			local picked = players[math.random(1, #players)]
 			-- Take a random position around
-			local pos = picked:getpos()
+			local pos = picked:get_pos()
 			if not pos then return end -- player not positioned yet
 			pos.y = pos.y + math.random(-32, 32)
 			pos.x = pos.x + math.random(-48, 48)
@@ -313,7 +313,7 @@ minetest.register_chatcommand('updshape', {
 		local player = minetest.get_player_by_name(name)
 		if not player then return false, 'Player not found' end
 		if not minetest.check_player_privs(player, {server=true}) then return false, 'Update shape requires server privileges' end
-		local pos = player:getpos()
+		local pos = player:get_pos()
 		local node_pos = {['x'] = pos.x, ['y'] = pos.y - 1, ['z'] = pos.z}
 		local node = minetest.get_node(node_pos)
 		if naturalslopeslib.update_shape(node_pos, node) then
