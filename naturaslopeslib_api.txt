@@ -6,6 +6,7 @@ Table of contents
 -- Definitions
 ---- ReplacementTable
 -- Registration API
+---- naturalslopeslib.get_regular_node_name
 ---- naturalslopeslib.get_replacement
 ---- naturalslopeslib.get_replacement_id
 ---- naturalslopeslib.register_slope
@@ -45,6 +46,11 @@ A table containing references to various shape. The type of references can eithe
 
 Registration API
 ----------------
+
+### naturalslopeslib.get_regular_node_name(slope_node_name)
+* `slope_node_name` a node name.
+* returns the name of the regular node (the unslopped one). Nil if it is not a slope node.
+* It may be unnaccurate as it checks only if the name follows the internal pattern for slope names.
 
 ### naturalslopeslib.get_replacement(source_node_name)
 * `sounce_node_name` a registered node name.

@@ -1,6 +1,19 @@
 -- Global namespace for functions
 naturalslopeslib = {}
 
+--- Get the name of the regular node from a slope, or nil.
+function naturalslopeslib.get_regular_node_name(node_name)
+	if string.find(node_name, ":slope_") == nil then
+		return nil
+	end
+	for _, regex in ipairs({"^(.-:)slope_inner_(.*)$", "^(.-:)slope_outer_(.*)$", "^(.-:)slope_pike_(.*)$", "^(.-:)slope_(.*)$"}) do
+		local match, match2 = string.match(node_name, regex)
+		if match and minetest.registered_nodes[match .. match2] ~= nil then
+			return match .. match2
+		end
+	end
+	return nil
+end
 --- Get node name for slopes from a subname.
 -- For example 'dirt' will be named 'naturalslopeslib:slope_dirt'
 function naturalslopeslib.get_straight_slope_name(subname)
