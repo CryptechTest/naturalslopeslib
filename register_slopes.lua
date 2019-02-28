@@ -314,10 +314,10 @@ function naturalslopeslib.register_slope(base_node_name, node_desc, update_chanc
 	-- Use a copy because tables are passed by reference. Otherwise the node
 	-- description is shared and updated even after minetest.register_node
 	local local_desc = table_copy(node_desc)
-	register_slope_straight(base_node_name, table_copy(node_desc), update_chance)
-	register_slope_inner(base_node_name, table_copy(node_desc), update_chance)
-	register_slope_outer(base_node_name, table_copy(node_desc), update_chance)
-	register_slope_pike(base_node_name, table_copy(node_desc), update_chance)
+	local str_name = register_slope_straight(base_node_name, table_copy(node_desc), update_chance)
+	local ic_name = register_slope_inner(base_node_name, table_copy(node_desc), update_chance)
+	local oc_name = register_slope_outer(base_node_name, table_copy(node_desc), update_chance)
+	local pk_name = register_slope_pike(base_node_name, table_copy(node_desc), update_chance)
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if naturalslopeslib.setting_enable_shape_on_walk() then
@@ -325,6 +325,14 @@ function naturalslopeslib.register_slope(base_node_name, node_desc, update_chanc
 			naturalslopeslib.update_shape_on_walk,
 			{name = base_node_name .. '_upd_shape',
 			chance = update_chance, priority = 500})
+	end
+	-- Enable surface update
+	if naturalslopeslib.setting_enable_surface_update() then
+		twmlib.register_twm({
+			nodenames = {base_node_name, str_name, ic_name, oc_name, pk_name},
+			chance = update_chance,
+			action = naturalslopeslib.update_shape
+		})
 	end
 	return naturalslopeslib.get_replacement(base_node_name)
 end
@@ -354,6 +362,14 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 	-- Set shape update data
 	local slope_names = {straight_name, inner_name, outer_name, pike_name}
 	add_replacement(base_node_name, update_chance, slope_names)
+	-- Set surface update
+	if naturalslopeslib.setting_enable_surface_update() then
+		twmlib.register_twm({
+			nodenames = {base_node_name, straight_name, inner_name, outer_name, pike_name},
+			chance = update_chance,
+			action = naturalslopeslib.update_shape
+		})
+	end
 	-- Set walk listener for the 5 nodes
 	if naturalslopeslib.setting_enable_shape_on_walk() then
 		local stomp_desc = {name = base_node_name .. '_upd_shape',

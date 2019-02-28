@@ -31,6 +31,7 @@ end
 
 -- Set functions to get configuration and default values
 function naturalslopeslib.setting_enable_surface_update()
+	if not _G.twmlib then return false end
 	local value = minetest.settings:get_bool('naturalslopeslib.enable_surface_update')
 	if value == nil then return true end
 	return value
