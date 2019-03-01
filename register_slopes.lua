@@ -264,6 +264,7 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 	node_desc.selection_box = slope_pike_box
 	node_desc.collision_box = slope_pike_box
 	node_desc.paramtype = 'light'
+	node_desc.paramtype2= 'facedir'
 	node_desc.is_ground_content = true
 	if node_desc.tiles and node_desc.tiles.top then
 		local tiles = {tile_get(node_desc.tiles, 'top')}
