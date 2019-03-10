@@ -61,14 +61,14 @@ Registration API
 * returns a ReplacementTable with node ids as values. Nil if no slopes are registered.
 
 ### naturalslopeslib.register_slope(base_node_name, node_def, update_chance)
-* Registers all slope shapes and automatic stomping for a full node.
+* Registers all slope shapes and automatic stomping for a full node. The group family:<base_node_name> is added to the sloped variations of the node.
 * `base_node_name` the full block node name.
 * `node_def` common definition for sloped nodes.
 * `update_chance` inverted chance for the node to be updated.
 * returns ReplacementTable.
 
 ### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance)
-* Link existing nodes. Same as register_slopes but without registering new nodes. Use it when the shapes are already registered from eslewhere.
+* Link existing nodes. Same as register_slopes but without registering new nodes. Use it when the shapes are already registered from eslewhere. The family group is not added.
 * `base_node_name` the full node name.
 * `straight_name` the straight slope node name.
 * `inner_name` the inner corner node name.

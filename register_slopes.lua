@@ -154,6 +154,9 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
+	if not node_desc.groups["family:" .. base_node_name] then
+		node_desc.groups["family:" .. base_node_name] = 1
+	end
 	local slope_name = naturalslopeslib.get_straight_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
 	-- Register stomp
@@ -192,6 +195,9 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 2
+	if not node_desc.groups["family:" .. base_node_name] then
+		node_desc.groups["family:" .. base_node_name] = 1
+	end
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
@@ -235,6 +241,9 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 3
+	if not node_desc.groups["family:" .. base_node_name] then
+		node_desc.groups["family:" .. base_node_name] = 1
+	end
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
@@ -277,6 +286,9 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 4
+	if not node_desc.groups["family:" .. base_node_name] then
+		node_desc.groups["family:" .. base_node_name] = 1
+	end
 	if not node_desc.drop then
 		node_desc.drop = base_node_name
 	end
