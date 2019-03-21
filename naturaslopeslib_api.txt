@@ -6,11 +6,13 @@ Table of contents
 -- Definitions
 ---- ReplacementTable
 -- Registration API
+---- naturalslopeslib.register_slope
+---- naturalslopeslib.set_slopes
+-- Getters
 ---- naturalslopeslib.get_regular_node_name
 ---- naturalslopeslib.get_replacement
 ---- naturalslopeslib.get_replacement_id
----- naturalslopeslib.register_slope
----- naturalslopeslib.set_slopes
+---- naturalslopeslib.get_all_shapes
 -- Shape update API
 ---- naturalslopeslib.is_free_for_shape_update
 ---- naturalslopeslib.area_is_free_for_erosion
@@ -47,19 +49,6 @@ A table containing references to various shape. The type of references can eithe
 Registration API
 ----------------
 
-### naturalslopeslib.get_regular_node_name(slope_node_name)
-* `slope_node_name` a node name.
-* returns the name of the regular node (the unslopped one). Nil if it is not a slope node.
-* It may be unnaccurate as it checks only if the name follows the internal pattern for slope names.
-
-### naturalslopeslib.get_replacement(source_node_name)
-* `sounce_node_name` a registered node name.
-* returns a SlopeDef. Nil if no slopes are registered.
-
-### naturalslopeslib.get_replacement_id(source_id)
-* `source_id` the id of the node.
-* returns a ReplacementTable with node ids as values. Nil if no slopes are registered.
-
 ### naturalslopeslib.register_slope(base_node_name, node_def, update_chance)
 * Registers all slope shapes and automatic stomping for a full node. The group family:<base_node_name> is added to the sloped variations of the node.
 * `base_node_name` the full block node name.
@@ -76,6 +65,26 @@ Registration API
 * `pike_name` the pike/slab node name.
 * `update_chance` the inverted chance of happening. 
 * returns ReplacementTable.
+
+Getters
+-------
+
+### naturalslopeslib.get_regular_node_name(slope_node_name)
+* `slope_node_name` a node name.
+* returns the name of the regular node (the unslopped one). Nil if it is not a slope node.
+* It may be unnaccurate as it checks only if the name follows the internal pattern for slope names.
+
+### naturalslopeslib.get_replacement(source_node_name)
+* `source_node_name` a registered node name.
+* returns a SlopeDef. Nil if no slopes are registered.
+
+### naturalslopeslib.get_replacement_id(source_id)
+* `source_id` the id of the node.
+* returns a ReplacementTable with node ids as values. Nil if no slopes are registered.
+
+### naturalslopeslib.get_all_shapes(source_node_name)
+Returns the node and all it's slope names in a table {source, straight, inner corner, outer corner, pike}. Returns {source} if there are no slopes for this node.
+* `source_node_name` The full block node name.
 
 Shape update API
 ----------------

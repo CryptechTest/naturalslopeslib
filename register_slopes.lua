@@ -72,6 +72,14 @@ function naturalslopeslib.get_replacement_id(source_id)
 	return replacement_ids[source_id]
 end
 
+function naturalslopeslib.get_all_shapes(source_node_name)
+	if replacements[source_node_name] then
+		local rp = replacements[source_node_name]
+		return {rp.source, rp.straight, rp.inner, rp.outer, rp.pike}
+	else
+		return {source_node_name}
+	end
+end
 
 --[[ Bounding boxes
 --]]
@@ -304,16 +312,6 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 	return slope_name
 end
 
-local function table_copy(table)
-	local orig_type = type(table)
-	local copy = {}
-	if orig_type ~= 'table' then return table end
-	for orig_key, orig_value in next, table, nil do
-		copy[orig_key] = table_copy(orig_value)
-	end
-	return copy
-end
-
 --- Register slopes from a full block node.
 -- @param base_node_name: The full block node name.
 -- @param node_desc: base for slope node descriptions.
@@ -326,11 +324,11 @@ function naturalslopeslib.register_slope(base_node_name, node_desc, update_chanc
 	end
 	-- Use a copy because tables are passed by reference. Otherwise the node
 	-- description is shared and updated even after minetest.register_node
-	local local_desc = table_copy(node_desc)
-	local str_name = register_slope_straight(base_node_name, table_copy(node_desc), update_chance)
-	local ic_name = register_slope_inner(base_node_name, table_copy(node_desc), update_chance)
-	local oc_name = register_slope_outer(base_node_name, table_copy(node_desc), update_chance)
-	local pk_name = register_slope_pike(base_node_name, table_copy(node_desc), update_chance)
+	local local_desc = table.copy(node_desc)
+	local str_name = register_slope_straight(base_node_name, table.copy(node_desc), update_chance)
+	local ic_name = register_slope_inner(base_node_name, table.copy(node_desc), update_chance)
+	local oc_name = register_slope_outer(base_node_name, table.copy(node_desc), update_chance)
+	local pk_name = register_slope_pike(base_node_name, table.copy(node_desc), update_chance)
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if naturalslopeslib.setting_enable_shape_on_walk() then
