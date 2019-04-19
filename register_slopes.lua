@@ -113,25 +113,6 @@ local slope_pike_box = {
 	},
 }
 
-local function tile_get(tiles, side)
-	if naturalslopeslib.setting_smooth_rendering()
-	and (side == 'front' or side == 'side' or side == 'back') then
-		return {name = tiles.top, backface_culling = true}
-	end
-	local tile = nil
-	if side == 'top' then tile = tiles.top end
-	if side == 'bottom' then tile = (tiles.bottom or tiles.top) end
-	if side == 'front' then tile = (tiles.front or tiles.top) end
-	if side == 'side' then tile = (tiles.side or tiles.front or tiles.top) end
-	if side == 'back' then tile = (tiles.back or tiles.side or tiles.front or tiles.top) end
-	if type(tile) == 'table' then
-		tile.backface_culling = true
-	else
-		tile = {name = tile, backface_culling = true}
-	end
-	return tile
-end
-
 --- {Private} Register a straight slope and link to the original node.
 local function register_slope_straight(base_node_name, node_desc, update_chance)
 	-- Register slope node
@@ -147,21 +128,8 @@ local function register_slope_straight(base_node_name, node_desc, update_chance)
 	node_desc.collision_box = slope_straight_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
-	node_desc.is_ground_content = true
-	if node_desc.tiles and node_desc.tiles.top then
-		local tiles = {tile_get(node_desc.tiles, 'top')}
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'side')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'side')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		node_desc.tiles = tiles
-	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 1
-	if not node_desc.drop then
-		node_desc.drop = base_node_name
-	end
 	if not node_desc.groups["family:" .. base_node_name] then
 		node_desc.groups["family:" .. base_node_name] = 1
 	end
@@ -191,23 +159,10 @@ local function register_slope_inner(base_node_name, node_desc, update_chance)
 	node_desc.collision_box = slope_inner_corner_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
-	node_desc.is_ground_content = true
-	if node_desc.tiles and node_desc.tiles.top then
-		local tiles = {tile_get(node_desc.tiles, 'top')}
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		node_desc.tiles = tiles
-	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 2
 	if not node_desc.groups["family:" .. base_node_name] then
 		node_desc.groups["family:" .. base_node_name] = 1
-	end
-	if not node_desc.drop then
-		node_desc.drop = base_node_name
 	end
 	local slope_name = naturalslopeslib.get_inner_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
@@ -237,23 +192,10 @@ local function register_slope_outer(base_node_name, node_desc, update_chance)
 	node_desc.collision_box = slope_outer_corner_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2 = 'facedir'
-	node_desc.is_ground_content = true
-	if node_desc.tiles and node_desc.tiles.top then
-		local tiles = {tile_get(node_desc.tiles, 'top')}
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'back')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		node_desc.tiles = tiles
-	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 3
 	if not node_desc.groups["family:" .. base_node_name] then
 		node_desc.groups["family:" .. base_node_name] = 1
-	end
-	if not node_desc.drop then
-		node_desc.drop = base_node_name
 	end
 	local slope_name = naturalslopeslib.get_outer_corner_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
@@ -282,23 +224,10 @@ local function register_slope_pike(base_node_name, node_desc, update_chance)
 	node_desc.collision_box = slope_pike_box
 	node_desc.paramtype = 'light'
 	node_desc.paramtype2= 'facedir'
-	node_desc.is_ground_content = true
-	if node_desc.tiles and node_desc.tiles.top then
-		local tiles = {tile_get(node_desc.tiles, 'top')}
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'bottom')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		tiles[#tiles+1] = tile_get(node_desc.tiles, 'front')
-		node_desc.tiles = tiles
-	end
 	if not node_desc.groups then node_desc.groups = {} end
 	node_desc.groups.natural_slope = 4
 	if not node_desc.groups["family:" .. base_node_name] then
 		node_desc.groups["family:" .. base_node_name] = 1
-	end
-	if not node_desc.drop then
-		node_desc.drop = base_node_name
 	end
 	local slope_name = naturalslopeslib.get_pike_slope_name(subname)
 	minetest.register_node(slope_name, node_desc)
@@ -317,18 +246,30 @@ end
 -- @param node_desc: base for slope node descriptions.
 -- @param update_chance: inverted chance for the node to be updated.
 -- @return Table of slope names: [straight, inner, outer, pike] or nil on error.
-function naturalslopeslib.register_slope(base_node_name, node_desc, update_chance)
+function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance)
 	if not update_chance then
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
 	end
+	local base_node_def = minetest.registered_nodes[base_node_name]
+	if not base_node_def then
+		minetest.log("error", "Trying to register slopes for an unknown node " .. (base_node_name or "nil"))
+		return
+	end
+	local full_copy = table.copy(base_node_def)
+	for key, value in pairs(def_changes) do
+		if value == "nil" then
+			full_copy[key] = nil
+		else
+			full_copy[key] = value
+		end
+	end
 	-- Use a copy because tables are passed by reference. Otherwise the node
 	-- description is shared and updated even after minetest.register_node
-	local local_desc = table.copy(node_desc)
-	local str_name = register_slope_straight(base_node_name, table.copy(node_desc), update_chance)
-	local ic_name = register_slope_inner(base_node_name, table.copy(node_desc), update_chance)
-	local oc_name = register_slope_outer(base_node_name, table.copy(node_desc), update_chance)
-	local pk_name = register_slope_pike(base_node_name, table.copy(node_desc), update_chance)
+	local str_name = register_slope_straight(base_node_name, table.copy(full_copy), update_chance)
+	local ic_name = register_slope_inner(base_node_name, table.copy(full_copy), update_chance)
+	local oc_name = register_slope_outer(base_node_name, table.copy(full_copy), update_chance)
+	local pk_name = register_slope_pike(base_node_name, table.copy(full_copy), update_chance)
 	add_replacement(base_node_name, update_chance)
 	-- Enable on walk update
 	if naturalslopeslib.setting_enable_shape_on_walk() then

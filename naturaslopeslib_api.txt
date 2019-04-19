@@ -49,15 +49,23 @@ A table containing references to various shape. The type of references can eithe
 Registration API
 ----------------
 
-### naturalslopeslib.register_slope(base_node_name, node_def, update_chance)
-* Registers all slope shapes and automatic stomping for a full node. The group family:<base_node_name> is added to the sloped variations of the node.
+### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance)
+* Registers all slope shapes and automatic stomping for a full node.
 * `base_node_name` the full block node name.
-* `node_def` common definition for sloped nodes.
+* `def_changes` changes to apply from the base node definition.
+  * All the attributes are copied to the sloped nodes expect those ones which are replaced:
+    * `drawtype` set to "nodebox" or "mesh" according to the rendering mode
+    * `nodebox` or `mesh` is replaced
+    * `selection_box` and `collision_box` matching to the according mesh
+    * `paramtype` and `paramtype2` set to "light" and "facedir" respectively
+    * the group "natural_slope" is added (1 = straight, 2 = inner corner, 3 = outer corner, 4 = pike)
+    * the group "family:<full node name>" is added
+  * Then they are changed from def_changes. Use "nil" string to explicitely erase a value (an not nil).
 * `update_chance` inverted chance for the node to be updated.
 * returns ReplacementTable.
 
 ### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance)
-* Link existing nodes. Same as register_slopes but without registering new nodes. Use it when the shapes are already registered from eslewhere. The family group is not added.
+* Link existing nodes. Same as register_slopes but without registering new nodes. Use it when the shapes are already registered from eslewhere. The node definitions are not changed at all.
 * `base_node_name` the full node name.
 * `straight_name` the straight slope node name.
 * `inner_name` the inner corner node name.
