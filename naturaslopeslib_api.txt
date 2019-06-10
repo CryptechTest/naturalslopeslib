@@ -23,6 +23,7 @@ Table of contents
 -- Chat commands
 ---- updshape
 
+
 Introduction
 ------------
 
@@ -32,10 +33,12 @@ Slopes can be generated in various ways. Those events can be turned on or off in
 
 As Minetest main unit is the block, having half-sized blocks can break a lot of things. Thus half-blocks like slopes are still considered as a single block. A single slope can turn back to a full node and vice-versa and half-blocks are not considered buildable upon (they will transform back into full block).
 
+
 Definitions
 -----------
 
 ### ReplacementTable
+
 A table containing references to various shape. The type of references can either be a name or an internal id.
 {
 	source   = full node reference,
@@ -46,10 +49,12 @@ A table containing references to various shape. The type of references can eithe
 	chance   = inverted chance of happening
 }
 
+
 Registration API
 ----------------
 
 ### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance)
+
 * Registers all slope shapes and automatic stomping for a full node.
 * `base_node_name` the full block node name.
 * `def_changes` changes to apply from the base node definition.
@@ -65,6 +70,7 @@ Registration API
 * returns ReplacementTable.
 
 ### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance)
+
 * Link existing nodes. Same as register_slopes but without registering new nodes. Use it when the shapes are already registered from eslewhere. The node definitions are not changed at all.
 * `base_node_name` the full node name.
 * `straight_name` the straight slope node name.
@@ -74,41 +80,50 @@ Registration API
 * `update_chance` the inverted chance of happening. 
 * returns ReplacementTable.
 
+
 Getters
 -------
 
 ### naturalslopeslib.get_regular_node_name(slope_node_name)
+
 * `slope_node_name` a node name.
 * returns the name of the regular node (the unslopped one). Nil if it is not a slope node.
 * It may be unnaccurate as it checks only if the name follows the internal pattern for slope names.
 
 ### naturalslopeslib.get_replacement(source_node_name)
+
 * `source_node_name` a registered node name.
 * returns a SlopeDef. Nil if no slopes are registered.
 
 ### naturalslopeslib.get_replacement_id(source_id)
+
 * `source_id` the id of the node.
 * returns a ReplacementTable with node ids as values. Nil if no slopes are registered.
 
 ### naturalslopeslib.get_all_shapes(source_node_name)
+
 Returns the node and all it's slope names in a table {source, straight, inner corner, outer corner, pike}. Returns {source} if there are no slopes for this node.
 * `source_node_name` The full block node name.
+
 
 Shape update API
 ----------------
 
 ### naturalslopeslib.is_free_for_shape_update(pos)
+
 * Checks if a node is considered free for defining which shape could be picked.
 * `pos` the position of the node to check (probably a neighbour of a candidate to shape update).
 * returns true or false
 
 ### naturalslopeslib.area_is_free_for_erosion(area, data, index)
+
 * Checks if a node is considered free for defining which shape could be picked.
 * `area` VoxelArea to use.
 * `data` Data from VoxelManip.
 * `index` position in area.
 
 ### naturalslopeslib.get_replacement_node(pos, node, area, data, param2_data)
+
 * Get the replacement node according to it's surroundings.
 * `pos` the position of the node or index with VoxelArea.
 * `node` the node at that position or content id with VoxelArea.
@@ -121,6 +136,7 @@ Shape update API
   * nil if no replacement is found.
 
 ### naturalslopeslib.chance_update_shape(pos, node, factor)
+
 * Do shape update when random roll passes on a single node.
 * `pos` the position to update.
 * `node` the node at pos.
@@ -128,21 +144,25 @@ Shape update API
 * returns true if an update was done, false otherwise.
 
 ### naturalslopeslib.update_shape(pos, node)
+
 * Do shape update disregarding chances.
 * `pos` the position to update.
 * `node` the node at pos.
 * returns true if an update was done, false otherwise.
 
 ### naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
+
 * Massive shape update with VoxelManip.
 * `minp` lower boundary of area.
 * `mapx` higher boundary of area.
 * `factor` Inverted factor for chance (0.1 means 10 times more likely to update)
 * `skip` optional random skip, roughfly ignore skip/2 to skip nodes.
 
+
 Chat commands
 -------------
 
 ### updshape
+
 * requires `server` privilege.
 * Force updating the node the player is standing upon.
