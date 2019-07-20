@@ -230,8 +230,9 @@ end
 -- @param mapx Higher boundary of area.
 -- @param factor Factor for chance (0.1 means 10 times more likely to update)
 -- @param skip (optional) Don't parse all nodes, skip randomly skip/2 to skip nodes
+-- @param start_i (optional) Hidden parameter to finish progressive updates
 -- at every loop.
-function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
+function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, start_i)
 	if not skip then skip = 0 end
 	-- Run on every block
 	local vm, emin, emax = minetest.get_voxel_manip()
@@ -240,6 +241,9 @@ function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
 	local data = vm:get_data()
 	local param2_data = vm:get_param2_data()
 	local i = area:indexp(e1)
+	if start_i then
+		i = i + start_i - 1
+	end
 	local imax = area:indexp(e2)
 	while i <= imax do
 		local x = (i-1) % area.ystride
@@ -266,6 +270,90 @@ function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
 	vm:write_to_map()
 end
 
+naturalslopeslib.progressive_area_updates = {}
+
+function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip)
+	table.insert(naturalslopeslib.progressive_area_updates, {minp = minp, maxp = maxp,
+			factor = factor, skip = skip, i = 1})
+end
+
+local function progressive_area_update()
+	if #naturalslopeslib.progressive_area_updates == 0 then
+		return true
+	end
+	-- pick an area around a player at random and process it
+	local players = minetest.get_connected_players()
+	local processed_area_index = nil
+	local alt_processed_area_index = nil
+	for area_index, area in ipairs(naturalslopeslib.progressive_area_updates) do
+		for _, p in ipairs(players) do
+			local minp = area.minp
+			local maxp = area.maxp
+			local ppos = p:get_pos()
+			if ppos.x >= minp.x and ppos.x <= maxp.x and ppos.y >= minp.y and ppos.y <= maxp.y and ppos.z >= minp.z and ppos.z <= maxp.z then
+				-- Prefer an area in which a player is
+				processed_area_index = area_index
+				break
+			elseif alt_processed_area_index == nil and ppos.x + 16 >= minp.x and ppos.x - 16 <= maxp.x and ppos.y + 16 >= minp.y and ppos.y - 16 <= maxp.y and ppos.z + 16 >= minp.z and ppos.z - 16 <= maxp.z then
+				-- Else pick an area near a player
+				alt_processed_area_index = area_index
+			end
+		end
+		if processed_area_index ~= nil then
+			break
+		end
+	end
+	if processed_area_index == nil then
+		if alt_processed_area_index ~= nil then
+			processed_area_index = alt_processed_area_index
+		else
+			processed_area_index = 1 -- try to reduce the queue as fast as possible
+		end
+	end
+	local area = naturalslopeslib.progressive_area_updates[processed_area_index]
+	local i = area.i
+	local y_size = area.maxp.y - area.minp.y + 1
+	local z_size = area.maxp.z - area.minp.z + 1
+	local imax = y_size * z_size * (area.maxp.x - area.minp.x + 1)
+	local start_time = os.clock()
+	while i <= imax do
+		local x = math.floor((i - 1) / (y_size * z_size))
+		local y = math.floor((i - 1) / z_size) % y_size
+		local z = (i - 1) % (z_size)
+		local pos = {x = area.minp.x + x, y = area.minp.y + y, z = area.minp.z + z}
+		local node = minetest.get_node(pos)
+		naturalslopeslib.chance_update_shape(pos, node, area.factor)
+		i = i + 1 + math.random(area.skip / 2, area.skip)
+		if (os.clock() - start_time) > 0.1 and i <= imax then
+			area.i = i
+			return false
+		end
+	end
+	table.remove(naturalslopeslib.progressive_area_updates, processed_area_index)
+	return true
+end
+
+if naturalslopeslib.setting_generation_method() == "Progressive" then
+	local generation_dtime = 0
+	local function generation_globalstep(dtime)
+		generation_dtime = generation_dtime + dtime
+		if generation_dtime > 0.1 then
+			progressive_area_update()
+			generation_dtime = 0
+		end
+	end
+	minetest.register_globalstep(generation_globalstep)
+
+	minetest.register_on_shutdown(function()
+		if #naturalslopeslib.progressive_area_updates > 0 then
+			minetest.log("info", "Processing slope generation for queued areas")
+			for i, area in ipairs(naturalslopeslib.progressive_area_updates) do
+				minetest.log("info", (#naturalslopeslib.progressive_area_updates - i + 1) .. " remaining area(s)")
+				naturalslopeslib.area_chance_update_shape(area.minp, area.maxp, area.factor, area.skip)
+			end
+		end
+	end)
+end
 
 --[[
 Triggers registration
@@ -294,10 +382,15 @@ minetest.register_chatcommand('updshape', {
 
 -- On generation big update
 if naturalslopeslib.setting_enable_shape_on_generation() then
-	minetest.register_on_generated(function(minp, maxp, seed)
-		naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(),
-			naturalslopeslib.setting_generation_skip())
-	end)
+	if naturalslopeslib.setting_generation_method() == "Progressive" then
+		minetest.register_on_generated(function(minp, maxp, seed)
+			naturalslopeslib.register_progressive_area_update(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+		end)
+	else
+		minetest.register_on_generated(function(minp, maxp, seed)
+			naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+		end)
+	end
 end
 
 --- On place neighbor update

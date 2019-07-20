@@ -50,6 +50,11 @@ function naturalslopeslib.setting_enable_shape_on_generation()
 	if value == nil then value = true end
 	return value
 end
+function naturalslopeslib.setting_generation_method()
+	local value = minetest.settings:get('naturalslopeslib.generation_method')
+	if value == nil then value = 'VoxelManip' end
+	return value
+end
 function naturalslopeslib.setting_generation_factor()
 	return tonumber(minetest.settings:get('naturalslopeslib.update_shape_generate_factor')) or 0.05
 end
