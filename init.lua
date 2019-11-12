@@ -75,4 +75,4 @@ end
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")
-
+dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/sloped_stomp.lua")

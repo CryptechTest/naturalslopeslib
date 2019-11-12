@@ -8,6 +8,7 @@ Table of contents
 -- Registration API
 ---- naturalslopeslib.register_slope
 ---- naturalslopeslib.set_slopes
+---- naturalslopeslib.register_sloped_stomp
 -- Getters
 ---- naturalslopeslib.get_regular_node_name
 ---- naturalslopeslib.get_replacement
@@ -80,6 +81,10 @@ Registration API
 * `update_chance` the inverted chance of happening. 
 * returns ReplacementTable.
 
+### naturalslopeslib.register_sloped_stomp(source_node_name, dest_node_name, stomp_desc)
+
+* Requires `poschangelib`. If the mod is not installed, this function will do nothing.
+* Register `stomp_desc` from all shapes of `source_node_name` to `dest_node_name`.
 
 Getters
 -------
