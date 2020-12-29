@@ -42,39 +42,39 @@ end
 -- Set functions to get configuration and default values
 function naturalslopeslib.setting_enable_surface_update()
 	if not twmlib_available then return false end
-	local value = minetest.settings:get_bool('naturalslopeslib.enable_surface_update')
+	local value = minetest.settings:get_bool('naturalslopeslib_enable_surface_update')
 	if value == nil then return true end
 	return value
 end
 function naturalslopeslib.setting_enable_shape_on_walk()
 	if not poschangelib_available then return false end
-	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_walk')
+	local value = minetest.settings:get_bool('naturalslopeslib_enable_shape_on_walk')
 	if value == nil then return true end
 	return value
 end
 function naturalslopeslib.setting_enable_shape_on_generation()
-	local value = minetest.settings:get_bool('naturalslopeslib.register_default_slopes')
+	local value = minetest.settings:get_bool('naturalslopeslib_register_default_slopes')
 	if value == nil then value = true end
 	return value
 end
 function naturalslopeslib.setting_generation_method()
-	local value = minetest.settings:get('naturalslopeslib.generation_method')
+	local value = minetest.settings:get('naturalslopeslib_generation_method')
 	if value == nil then value = 'VoxelManip' end
 	return value
 end
 function naturalslopeslib.setting_generation_factor()
-	return tonumber(minetest.settings:get('naturalslopeslib.update_shape_generate_factor')) or 0.05
+	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_factor')) or 0.05
 end
 function naturalslopeslib.setting_generation_skip()
-	return tonumber(minetest.settings:get('naturalslopeslib.update_shape_generate_skip')) or 0
+	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_skip')) or 0
 end
 function naturalslopeslib.setting_enable_shape_on_dig_place()
-	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_dig_place')
+	local value = minetest.settings:get_bool('naturalslopeslib_enable_shape_on_dig_place')
 	if value == nil then value = true end
 	return value
 end
 function naturalslopeslib.setting_smooth_rendering()
-	local value = minetest.settings:get_bool('naturalslopeslib.smooth_rendering')
+	local value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
 	if value == nil then value = false end
 	return value
 end
