@@ -46,9 +46,6 @@ function naturalslopeslib.setting_enable_surface_update()
 	if value == nil then return true end
 	return value
 end
-function naturalslopeslib.setting_surface_update_interval()
-	return tonumber(minetest.settings:get('naturalslopeslib.surface_update_interval')) or 5.0
-end
 function naturalslopeslib.setting_enable_shape_on_walk()
 	if not poschangelib_available then return false end
 	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_walk')
