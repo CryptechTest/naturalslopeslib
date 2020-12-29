@@ -1,6 +1,16 @@
 -- Global namespace for functions
 naturalslopeslib = {}
 
+local poschangelib_available = false
+local twmlib_available = false
+for _, name in ipairs(minetest.get_modnames()) do
+	if name == "poschangelib" then
+		poschangelib_available = true
+	elseif name == "twmlib" then
+		twmlib_available = true
+	end
+end
+
 --- Get the name of the regular node from a slope, or nil.
 function naturalslopeslib.get_regular_node_name(node_name)
 	if string.find(node_name, ":slope_") == nil then
@@ -31,7 +41,7 @@ end
 
 -- Set functions to get configuration and default values
 function naturalslopeslib.setting_enable_surface_update()
-	if not _G.twmlib then return false end
+	if not twmlib_available then return false end
 	local value = minetest.settings:get_bool('naturalslopeslib.enable_surface_update')
 	if value == nil then return true end
 	return value
@@ -40,7 +50,7 @@ function naturalslopeslib.setting_surface_update_interval()
 	return tonumber(minetest.settings:get('naturalslopeslib.surface_update_interval')) or 5.0
 end
 function naturalslopeslib.setting_enable_shape_on_walk()
-	if not _G.poschangelib then return false end
+	if not poschangelib_available then return false end
 	local value = minetest.settings:get_bool('naturalslopeslib.enable_shape_on_walk')
 	if value == nil then return true end
 	return value
