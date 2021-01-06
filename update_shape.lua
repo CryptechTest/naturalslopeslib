@@ -381,17 +381,20 @@ minetest.register_chatcommand('updshape', {
 })
 
 -- On generation big update
-if naturalslopeslib.setting_enable_shape_on_generation() then
-	if naturalslopeslib.setting_generation_method() == "Progressive" then
-		minetest.register_on_generated(function(minp, maxp, seed)
-			naturalslopeslib.register_progressive_area_update(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
-		end)
-	else
-		minetest.register_on_generated(function(minp, maxp, seed)
-			naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
-		end)
+local function register_on_generation()
+	if naturalslopeslib.setting_enable_shape_on_generation() then
+		if naturalslopeslib.setting_generation_method() == "Progressive" then
+			minetest.register_on_generated(function(minp, maxp, seed)
+				naturalslopeslib.register_progressive_area_update(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+			end)
+		else
+			minetest.register_on_generated(function(minp, maxp, seed)
+				naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+			end)
+		end
 	end
 end
+minetest.register_on_mods_loaded(register_on_generation)
 
 --- On place neighbor update
 local function on_place_or_dig(pos, force_below)
