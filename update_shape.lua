@@ -382,6 +382,9 @@ minetest.register_chatcommand('updshape', {
 
 -- On generation big update
 local function register_on_generation()
+	if not naturalslopeslib._register_on_generated then
+		return
+	end
 	if naturalslopeslib.setting_enable_shape_on_generation() then
 		if naturalslopeslib.setting_generation_method() == "Progressive" then
 			minetest.register_on_generated(function(minp, maxp, seed)

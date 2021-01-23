@@ -20,7 +20,9 @@ Table of contents
 ---- naturalslopeslib.get_replacement_node
 ---- naturalslopeslib.chance_update_shape
 ---- naturalslopeslib.update_shape
+-- Map generation
 ---- naturalslopeslib.area_chance_update_shape
+---- naturalslopeslib.register_progressive_area_update
 -- Chat commands
 ---- updshape
 
@@ -155,9 +157,32 @@ Shape update API
 * `node` the node at pos.
 * returns true if an update was done, false otherwise.
 
+
+Map generation
+--------------
+
+These functions allows to tweak the map generation to change the default behaviour.
+Which is updating an area on generation after other map generation functions.
+
+### naturalslopeslib.set_manual_map_generation()
+
+* Disables the default registration to handle the mapgen manually.
+* Once it is called, other mods should take care of handling shape update
+  on generation. Otherwise nothing is done.
+
 ### naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip)
 
-* Massive shape update with VoxelManip.
+* Massive shape update with VoxelManip. This is the VoxelManip on generation
+  method.
+* `minp` lower boundary of area.
+* `mapx` higher boundary of area.
+* `factor` Inverted factor for chance (0.1 means 10 times more likely to update)
+* `skip` optional random skip, roughfly ignore skip/2 to skip nodes.
+
+### naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip)
+
+* Mark an area to be updated progressively. This is the Progressive on generation
+  method. The area is not updated instantly but added to a list.
 * `minp` lower boundary of area.
 * `mapx` higher boundary of area.
 * `factor` Inverted factor for chance (0.1 means 10 times more likely to update)

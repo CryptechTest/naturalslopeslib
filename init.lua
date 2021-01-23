@@ -1,5 +1,7 @@
 -- Global namespace for functions
-naturalslopeslib = {}
+naturalslopeslib = {
+	_register_on_generated = true
+}
 
 local poschangelib_available = false
 local twmlib_available = false
@@ -77,6 +79,10 @@ function naturalslopeslib.setting_smooth_rendering()
 	local value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
 	if value == nil then value = false end
 	return value
+end
+
+function naturalslopeslib.set_manual_map_generation()
+	naturalslopeslib._register_on_generated = false
 end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
