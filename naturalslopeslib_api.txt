@@ -129,18 +129,21 @@ Shape update API
 * `data` Data from VoxelManip.
 * `index` position in area.
 
-### naturalslopeslib.get_replacement_node(pos, node, area, data, param2_data)
+### naturalslopeslib.get_replacement_node(pos, node, [area, data, param2_data])
 
-* Get the replacement node according to it's surroundings.
-* `pos` the position of the node or index with VoxelArea.
-* `node` the node at that position or content id with VoxelArea.
-* `area` the VoxelArea, nil for single position update (determines which type of the two previous arguments are).
-* `data` Data from VoxelManip, nil for single position update.
-* `param2_data` param2 data from VoxelManip, nil for single position update.
-* returns the parameters to update the node.
-  * a node to use with minetest.set_node when called without area;
-  * a table with id and param2_data when called with an area;
-  * nil if no replacement is found.
+* Get the replacement node according to it's surroundings. This function exists in two formats, for a single position or a VoxelArea
+* In both case, it returns the parameters to update the node or nil when no replacement is available.
+* For a single node
+  * `pos` the position of the node or index with VoxelArea.
+  * `node` the node at that position.
+  * returns a node for minetest.set_node.
+* For a VoxelArea
+  * `index` (the `pos` argument) the index within the area.
+  * `content_id` (the `node` argument) the node at that position or content id with VoxelArea.
+  * `area` the VoxelArea, nil for single position update (determines which type of the two previous arguments are).
+  * `data` Data from VoxelManip, nil for single position update.
+  * `param2_data` param2 data from VoxelManip, nil for single position update.
+  * Returns a table with id and param2_data.
 
 ### naturalslopeslib.chance_update_shape(pos, node, factor)
 
