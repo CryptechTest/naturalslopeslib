@@ -65,18 +65,23 @@ Surrounding checks and get replacement
 --- Check if a node is considered empty to switch shape.
 -- @param pos The position to check
 function naturalslopeslib.is_free_for_shape_update(pos)
-	if not pos then return false end
-	if minetest.get_node(pos).name == 'air' then return true end
-	-- TODO add water for canditates
-	return false
-end
-local air_id = minetest.get_content_id('air')
-function naturalslopeslib.area_is_free_for_erosion(area, data, index)
-	if not area:containsi(index) then return false end
-	if data[index] == air_id then return true end
-	return false
+	if not pos then return nil end
+	local node = minetest.get_node_or_nil(pos)
+	if node == nil then
+		return nil
+	end
+	return node.name == 'air'
 end
 
+local air_id = minetest.get_content_id('air')
+function naturalslopeslib.area_is_free_for_shape_update(area, data, index)
+	if not area:containsi(index) then
+		return nil
+	end
+	return data[index] == air_id
+end
+-- Deprecated name
+naturalslopeslib.area_is_free_for_erosion = naturalslopeslib.area_is_free_for_shape_update
 
 --- Get the replacement node according to it's surroundings.
 -- @param pos The position of the node or index with VoxelArea.
@@ -95,7 +100,7 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 	local node_name = nil -- Either name or id
 	if area then
 		is_free = function (at_index) -- always use with new_pos
-			return naturalslopeslib.area_is_free_for_erosion(area, data, at_index)
+			return naturalslopeslib.area_is_free_for_shape_update(area, data, at_index)
 		end
 		new_pos = function(add) -- Get new index from current with add position
 			local area_pos = area:position(pos)

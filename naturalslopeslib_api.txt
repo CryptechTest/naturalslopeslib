@@ -16,7 +16,7 @@ Table of contents
 ---- naturalslopeslib.get_all_shapes
 -- Shape update API
 ---- naturalslopeslib.is_free_for_shape_update
----- naturalslopeslib.area_is_free_for_erosion
+---- naturalslopeslib.area_is_free_for_shape_update
 ---- naturalslopeslib.get_replacement_node
 ---- naturalslopeslib.chance_update_shape
 ---- naturalslopeslib.update_shape
@@ -120,14 +120,16 @@ Shape update API
 
 * Checks if a node is considered free for defining which shape could be picked.
 * `pos` the position of the node to check (probably a neighbour of a candidate to shape update).
-* returns true or false
+* returns true if the node is free, false if occupide, nil if unknown (not loaded)
 
-### naturalslopeslib.area_is_free_for_erosion(area, data, index)
+### naturalslopeslib.area_is_free_for_shape_update(area, data, index)
 
 * Checks if a node is considered free for defining which shape could be picked.
+* Was previously named naturalslopeslib.area_is_free_for_erosion.
 * `area` VoxelArea to use.
 * `data` Data from VoxelManip.
 * `index` position in area.
+* returns true if the node is free, false if occupide, nil if unknown (not loaded)
 
 ### naturalslopeslib.get_replacement_node(pos, node, [area, data, param2_data])
 
