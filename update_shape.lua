@@ -91,7 +91,7 @@ naturalslopeslib.area_is_free_for_erosion = naturalslopeslib.area_is_free_for_sh
 -- @param param2_data Param2 data from VoxelManip, nil for single position update.
 -- @return A node to use with minetest.set_node
 -- or a table with id and param2_data if called with an area.
--- Nil if no replacement is found.
+-- Nil if no replacement is found or a neighbour cannot be read.
 function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_data)
 	-- Set functions and data according to update mode: single or VoxelManip
 	local is_free = nil
@@ -122,6 +122,9 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 	-- If there's something above and below, get back to full block
 	local above_free = is_free(new_pos({x=0, y=1, z=0}))
 	local below_free = is_free(new_pos({x=0, y=-1, z=0}))
+	if above_free == nil or below_free == nil then
+		return nil
+	end
 	if above_free and not below_free then
 		is_ground = true
 		pointing_y = 1
@@ -133,9 +136,13 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 	end
 	-- Check blocks around
 	local airXP = is_free(new_pos({x=1, y=0, z=0}))
+	if airXP == nil then return nil end
 	local airXM = is_free(new_pos({x=-1, y=0, z=0}))
+	if airXM == nil then return nil end
 	local airZP = is_free(new_pos({x=0, y=0, z=1}))
+	if airZP == nil then return nil end
 	local airZM = is_free(new_pos({x=0, y=0, z=-1}))
+	if airZM == nil then return nil end
 	local free_neighbors = 0
 	for index, free in next, {airXP, airXM, airZP, airZM} do
 		if free then free_neighbors = free_neighbors + 1 end
@@ -230,15 +237,55 @@ function naturalslopeslib.update_shape(pos, node)
 	end
 end
 
+local function get_edges(minp, maxp)
+	-- corner000 = minp
+	local corner001 = {x = minp.x, y = minp.y, z = maxp.z}
+	local corner010 = {x = minp.x, y = maxp.y, z = minp.z}
+	local corner011 = {x = minp.x, y = maxp.y, z = maxp.z}
+	local corner100 = {x = maxp.x, y = minp.y, z = minp.z}
+	local corner101 = {x = maxp.x, y = minp.y, z = maxp.z}
+	local corner110 = {x = maxp.x, y = maxp.y, z = minp.z}
+	-- corner111 = maxp
+	return { -- min pos, max pos, normal[x, y ,z]
+		-- The 8 corners
+		{minp,      minp,      {-1, -1, -1}},
+		{corner001, corner001, {-1, -1,  1}},
+		{corner010, corner010, {-1,  1, -1}},
+		{corner011, corner011, {-1,  1,  1}},
+		{corner100, corner100, { 1, -1, -1}},
+		{corner101, corner101, { 1, -1,  1}},
+		{corner110, corner110, { 1,  1, -1}},
+		{maxp,      maxp,      { 1,  1,  1}},
+		-- The 8 segments
+		{{x = minp.x + 1, y = minp.y, z = minp.z}, {x = maxp.x - 1, y = minp.y, z = minp.z}, { 0, -1, -1}},
+		{{x = minp.x + 1, y = maxp.y, z = minp.z}, {x = maxp.x - 1, y = maxp.y, z = minp.z}, { 0,  1, -1}},
+		{{x = minp.x, y = minp.y + 1, z = minp.z}, {x = minp.x, y = maxp.y - 1, z = minp.z}, {-1,  0, -1}},
+		{{x = maxp.x, y = minp.y + 1, z = minp.z}, {x = maxp.x, y = maxp.y - 1, z = minp.z}, { 1,  0, -1}},
+		{{x = minp.x + 1, y = minp.y, z = maxp.z}, {x = maxp.x - 1, y = minp.y, z = maxp.z}, { 0, -1, 1}},
+		{{x = minp.x + 1, y = maxp.y, z = maxp.z}, {x = maxp.x - 1, y = maxp.y, z = maxp.z}, { 0,  1, 1}},
+		{{x = minp.x, y = minp.y + 1, z = maxp.z}, {x = minp.x, y = maxp.y - 1, z = maxp.z}, { -1, 0, 1}},
+		{{x = maxp.x, y = minp.y + 1, z = maxp.z}, {x = maxp.x, y = maxp.y - 1, z = maxp.z}, {  1, 0, 1}},
+		-- The 6 faces
+		{{x = minp.x + 1, y = minp.y, z = minp.z + 1}, {x = maxp.x - 1, y = minp.y, z = maxp.z - 1}, {  0, -1,  0}},
+		{{x = minp.x + 1, y = maxp.y, z = minp.z + 1}, {x = maxp.x - 1, y = maxp.y, z = maxp.z - 1}, {  0,  1,  0}},
+		{{x = minp.x, y = minp.y + 1, z = minp.z + 1}, {x = minp.x, y = maxp.y - 1, z = maxp.z - 1}, { -1,  0,  0}},
+		{{x = maxp.x, y = minp.y + 1, z = minp.z + 1}, {x = maxp.x, y = maxp.y - 1, z = maxp.z - 1}, {  1,  0,  0}},
+		{{x = minp.x + 1, y = minp.y + 1, z = minp.z}, {x = maxp.x - 1, y = maxp.y - 1, z = minp.z}, {  0,  0, -1}},
+		{{x = minp.x + 1, y = minp.y + 1, z = maxp.z}, {x = maxp.x - 1, y = maxp.y - 1, z = maxp.z}, {  0,  0,  1}}
+	}
+end
+
 --- Massive shape update with VoxelManip.
 -- @param minp Lower boundary of area.
 -- @param mapx Higher boundary of area.
 -- @param factor Factor for chance (0.1 means 10 times more likely to update)
 -- @param skip (optional) Don't parse all nodes, skip randomly skip/2 to skip nodes
 -- @param start_i (optional) Hidden parameter to finish progressive updates
+-- @param progressive_edges (optional) When true, edges are generated progressively (default)
 -- at every loop.
-function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, start_i)
+function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, progressive_edges)
 	if not skip then skip = 0 end
+	if progressive_edges == nil then progressive_edges = true end
 	-- Run on every block
 	local vm, emin, emax = minetest.get_voxel_manip()
 	local e1, e2 = vm:read_from_map(minp, maxp)
@@ -246,16 +293,19 @@ function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, sta
 	local data = vm:get_data()
 	local param2_data = vm:get_param2_data()
 	local i = area:indexp(e1)
-	if start_i then
-		i = i + start_i - 1
-	end
 	local imax = area:indexp(e2)
+	if progressive_edges then
+		local edges = get_edges(minp, maxp)
+		for _, edge in ipairs(edges) do
+			naturalslopeslib.register_progressive_area_update(edge[1], edge[2], factor, skip, {x = edge[3][1], y = edge[3][2], z = edge[3][3]})
+		end
+	end
 	while i <= imax do
 		local x = (i-1) % area.ystride
 		local y = (i-1) % area.zstride
 		if x == 0 or x == area.ystride - 1
 		or y == 0 or y == area.zstride - 1 then
-			-- Continue, this is the edge and it cannot check neighbors
+			-- Skip edges
 		else
 			local replacement = naturalslopeslib.get_replacement_id(data[i])
 			if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
@@ -277,14 +327,63 @@ end
 
 naturalslopeslib.progressive_area_updates = {}
 
-function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip)
-	table.insert(naturalslopeslib.progressive_area_updates, {minp = minp, maxp = maxp,
-			factor = factor, skip = skip, i = 1})
+function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip, edge_normal)
+	if edge_normal ~= nil or minp.x == maxp.x or minp.y == maxp.y or minp.z == maxp.z then
+		-- Explicit edge or ignored
+		table.insert(naturalslopeslib.progressive_area_updates, {minp = minp, maxp = maxp,
+				factor = factor, skip = skip, i = 1, edge_normal = edge_normal})
+		return
+	end
+	-- else register the inner cube and all edges
+	-- The inner cube
+	table.insert(naturalslopeslib.progressive_area_updates, {
+			minp = vector.add(minp, 1),
+			maxp = vector.add(maxp, -1),
+			factor = factor, skip = skip, i = 1, edge_normal = nil})
+	local edges = get_edges(minp, maxp)
+	-- Register
+	for _, edge in ipairs(edges) do
+		table.insert(naturalslopeslib.progressive_area_updates, {
+				minp = edge[1], maxp = edge[2],
+				factor = factor, skip = skip, i = 1,
+				edge_normal = {x = edge[3][1], y = edge[3][2], z = edge[3][3]}
+		})
+	end
 end
 
-local function progressive_area_update()
+
+local function check_area_edges(area)
+	if area.edge_normal == nil then
+		return true
+	end
+	local edge = area.edge_normal
+	local pos = area.minp
+	local requirements = math.abs(edge.x) + math.abs(edge.y) + math.abs(edge.z)
+	local found = 0
+	if edge.x ~= 0 then
+		if minetest.get_node_or_nil(vector.add(pos, {x = edge.x, y = 0, z = 0})) ~= nil then
+			found = found + 1
+		end
+	end
+	if edge.y ~= 0 then
+		if minetest.get_node_or_nil(vector.add(pos, {x = 0, y = edge.y, z = 0})) ~= nil then
+			found = found + 1
+		end
+	end
+	if edge.z ~= 0 then
+		if minetest.get_node_or_nil(vector.add(pos, {x = 0, y = 0, z = edge.z})) ~= nil then
+			found = found + 1
+		end
+	end
+	return found == requirements
+end
+
+local function progressive_area_update(start_time)
 	if #naturalslopeslib.progressive_area_updates == 0 then
 		return true
+	end
+	if start_time == nil then
+		start_time = os.clock()
 	end
 	-- pick an area around a player at random and process it
 	local players = minetest.get_connected_players()
@@ -297,15 +396,19 @@ local function progressive_area_update()
 			local ppos = p:get_pos()
 			if ppos.x >= minp.x and ppos.x <= maxp.x and ppos.y >= minp.y and ppos.y <= maxp.y and ppos.z >= minp.z and ppos.z <= maxp.z then
 				-- Prefer an area in which a player is
-				processed_area_index = area_index
-				break
+				if (check_area_edges(area)) then
+					processed_area_index = area_index
+					break
+				end
 			elseif alt_processed_area_index == nil and ppos.x + 16 >= minp.x and ppos.x - 16 <= maxp.x and ppos.y + 16 >= minp.y and ppos.y - 16 <= maxp.y and ppos.z + 16 >= minp.z and ppos.z - 16 <= maxp.z then
 				-- Else pick an area near a player
-				alt_processed_area_index = area_index
+				if (check_area_edges(area)) then
+					alt_processed_area_index = area_index
+				end
 			end
 		end
 		if processed_area_index ~= nil then
-			break
+			local area = naturalslopeslib.progressive_area_updates[processed_area_index]
 		end
 	end
 	if processed_area_index == nil then
@@ -320,7 +423,6 @@ local function progressive_area_update()
 	local y_size = area.maxp.y - area.minp.y + 1
 	local z_size = area.maxp.z - area.minp.z + 1
 	local imax = y_size * z_size * (area.maxp.x - area.minp.x + 1)
-	local start_time = os.clock()
 	while i <= imax do
 		local x = math.floor((i - 1) / (y_size * z_size))
 		local y = math.floor((i - 1) / z_size) % y_size
@@ -335,30 +437,31 @@ local function progressive_area_update()
 		end
 	end
 	table.remove(naturalslopeslib.progressive_area_updates, processed_area_index)
+	if os.clock() - start_time < 0.1 then
+		progressive_area_update(start_time)
+	end
 	return true
 end
 
-if naturalslopeslib.setting_generation_method() == "Progressive" then
-	local generation_dtime = 0
-	local function generation_globalstep(dtime)
-		generation_dtime = generation_dtime + dtime
-		if generation_dtime > 0.1 then
-			progressive_area_update()
-			generation_dtime = 0
+local generation_dtime = 0
+local function generation_globalstep(dtime)
+	generation_dtime = generation_dtime + dtime
+	if generation_dtime > 0.1 then
+		progressive_area_update()
+		generation_dtime = 0
+	end
+end
+minetest.register_globalstep(generation_globalstep)
+
+minetest.register_on_shutdown(function()
+	if #naturalslopeslib.progressive_area_updates > 0 then
+		minetest.log("info", "Processing slope generation for queued areas")
+		for i, area in ipairs(naturalslopeslib.progressive_area_updates) do
+			minetest.log("info", (#naturalslopeslib.progressive_area_updates - i + 1) .. " remaining area(s)")
+			naturalslopeslib.area_chance_update_shape(area.minp, area.maxp, area.factor, area.skip, false)
 		end
 	end
-	minetest.register_globalstep(generation_globalstep)
-
-	minetest.register_on_shutdown(function()
-		if #naturalslopeslib.progressive_area_updates > 0 then
-			minetest.log("info", "Processing slope generation for queued areas")
-			for i, area in ipairs(naturalslopeslib.progressive_area_updates) do
-				minetest.log("info", (#naturalslopeslib.progressive_area_updates - i + 1) .. " remaining area(s)")
-				naturalslopeslib.area_chance_update_shape(area.minp, area.maxp, area.factor, area.skip)
-			end
-		end
-	end)
-end
+end)
 
 --[[
 Triggers registration
