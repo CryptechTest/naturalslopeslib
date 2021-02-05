@@ -113,132 +113,112 @@ local slope_pike_box = {
 	},
 }
 
---- {Private} Register a straight slope and link to the original node.
-local function register_slope_straight(base_node_name, node_desc, update_chance)
-	-- Register slope node
-	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+--- {Private} Update the node definition for a straight slope
+local function get_straight_def(base_node_name, node_def)
 	if naturalslopeslib.setting_smooth_rendering() then
-		node_desc.drawtype = 'mesh'
-		node_desc.mesh = 'naturalslopeslib_straight.obj'
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_straight.obj'
 	else
-		node_desc.drawtype = 'nodebox'
-		node_desc.node_box = slope_straight_box
+		node_def.drawtype = 'nodebox'
+		node_def.node_box = slope_straight_box
 	end
-	node_desc.selection_box = slope_straight_box
-	node_desc.collision_box = slope_straight_box
-	node_desc.paramtype = 'light'
-	node_desc.paramtype2 = 'facedir'
-	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 1
-	if not node_desc.groups["family:" .. base_node_name] then
-		node_desc.groups["family:" .. base_node_name] = 1
+	node_def.selection_box = slope_straight_box
+	node_def.collision_box = slope_straight_box
+	node_def.paramtype = 'light'
+	node_def.paramtype2 = 'facedir'
+	if not node_def.groups then node_def.groups = {} end
+	node_def.groups.natural_slope = 1
+	if not node_def.groups["family:" .. base_node_name] then
+		node_def.groups["family:" .. base_node_name] = 1
 	end
-	local slope_name = naturalslopeslib.get_straight_slope_name(subname)
-	minetest.register_node(slope_name, node_desc)
-	-- Register stomp
-	if naturalslopeslib.setting_enable_shape_on_walk() then
-		poschangelib.register_stomp(slope_name,
-			naturalslopeslib.update_shape_on_walk,
-			{name = slope_name .. '_upd_shape',
-			chance = update_chance, priority = 500})
-	end
-	return slope_name
+	return node_def
 end
 
---- {Private} Register an inner corner and link to the original node.
-local function register_slope_inner(base_node_name, node_desc, update_chance)
-	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+--- {Private} Update the node definition for an inner corner
+local function get_inner_def(base_node_name, node_def)
 	if naturalslopeslib.setting_smooth_rendering() then
-		node_desc.drawtype = 'mesh'
-		node_desc.mesh = 'naturalslopeslib_inner.obj'
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_inner.obj'
 	else
-		node_desc.drawtype = 'nodebox'
-		node_desc.node_box = slope_inner_corner_box
+		node_def.drawtype = 'nodebox'
+		node_def.node_box = slope_inner_corner_box
 	end
-	node_desc.selection_box = slope_inner_corner_box
-	node_desc.collision_box = slope_inner_corner_box
-	node_desc.paramtype = 'light'
-	node_desc.paramtype2 = 'facedir'
-	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 2
-	if not node_desc.groups["family:" .. base_node_name] then
-		node_desc.groups["family:" .. base_node_name] = 1
+	node_def.selection_box = slope_inner_corner_box
+	node_def.collision_box = slope_inner_corner_box
+	node_def.paramtype = 'light'
+	node_def.paramtype2 = 'facedir'
+	if not node_def.groups then node_def.groups = {} end
+	node_def.groups.natural_slope = 2
+	if not node_def.groups["family:" .. base_node_name] then
+		node_def.groups["family:" .. base_node_name] = 1
 	end
-	local slope_name = naturalslopeslib.get_inner_corner_slope_name(subname)
-	minetest.register_node(slope_name, node_desc)
-
-	-- Register walk listener
-	if naturalslopeslib.setting_enable_shape_on_walk() then
-		poschangelib.register_stomp(slope_name,
-			naturalslopeslib.update_shape_on_walk,
-			{name = slope_name .. '_upd_shape',
-			chance = update_chance, priority = 500})
-
-	end
-	return slope_name
+	return node_def
 end
 
---- {Private} Register an outer corner and link to the original node.
-local function register_slope_outer(base_node_name, node_desc, update_chance)
-	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+--- {Private} Update the node definition for an outer corner
+local function get_outer_def(base_node_name, node_def)
 	if naturalslopeslib.setting_smooth_rendering() then
-		node_desc.drawtype = 'mesh'
-		node_desc.mesh = 'naturalslopeslib_outer.obj'
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_outer.obj'
 	else
-		node_desc.drawtype = 'nodebox'
-		node_desc.node_box = slope_outer_corner_box
+		node_def.drawtype = 'nodebox'
+		node_def.node_box = slope_outer_corner_box
 	end
-	node_desc.selection_box = slope_outer_corner_box
-	node_desc.collision_box = slope_outer_corner_box
-	node_desc.paramtype = 'light'
-	node_desc.paramtype2 = 'facedir'
-	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 3
-	if not node_desc.groups["family:" .. base_node_name] then
-		node_desc.groups["family:" .. base_node_name] = 1
+	node_def.selection_box = slope_outer_corner_box
+	node_def.collision_box = slope_outer_corner_box
+	node_def.paramtype = 'light'
+	node_def.paramtype2 = 'facedir'
+	if not node_def.groups then node_def.groups = {} end
+	node_def.groups.natural_slope = 3
+	if not node_def.groups["family:" .. base_node_name] then
+		node_def.groups["family:" .. base_node_name] = 1
 	end
-	local slope_name = naturalslopeslib.get_outer_corner_slope_name(subname)
-	minetest.register_node(slope_name, node_desc)
-
-	-- Register walk listener
-	if naturalslopeslib.setting_enable_shape_on_walk() then
-		poschangelib.register_stomp(slope_name,
-			naturalslopeslib.update_shape_on_walk,
-			{name = slope_name .. '_upd_shape',
-			chance = update_chance, priority = 500})
-	end
-	return slope_name
+	return node_def
 end
 
---- {Private} Register a pike and link to the original node.
-local function register_slope_pike(base_node_name, node_desc, update_chance)
-	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+--- {Private} Update the node definition for a pike
+local function get_pike_def(base_node_name, node_def, update_chance)
 	if naturalslopeslib.setting_smooth_rendering() then
-		node_desc.drawtype = 'mesh'
-		node_desc.mesh = 'naturalslopeslib_pike.obj'
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_pike.obj'
 	else
-		node_desc.drawtype = 'nodebox'
-		node_desc.node_box = slope_pike_box
+		node_def.drawtype = 'nodebox'
+		node_def.node_box = slope_pike_box
 	end
-	node_desc.selection_box = slope_pike_box
-	node_desc.collision_box = slope_pike_box
-	node_desc.paramtype = 'light'
-	node_desc.paramtype2= 'facedir'
-	if not node_desc.groups then node_desc.groups = {} end
-	node_desc.groups.natural_slope = 4
-	if not node_desc.groups["family:" .. base_node_name] then
-		node_desc.groups["family:" .. base_node_name] = 1
+	node_def.selection_box = slope_pike_box
+	node_def.collision_box = slope_pike_box
+	node_def.paramtype = 'light'
+	node_def.paramtype2= 'facedir'
+	if not node_def.groups then node_def.groups = {} end
+	node_def.groups.natural_slope = 4
+	if not node_def.groups["family:" .. base_node_name] then
+		node_def.groups["family:" .. base_node_name] = 1
 	end
-	local slope_name = naturalslopeslib.get_pike_slope_name(subname)
-	minetest.register_node(slope_name, node_desc)
-	-- Register walk listener
-	if naturalslopeslib.setting_enable_shape_on_walk() then
-		poschangelib.register_stomp(slope_name,
-			naturalslopeslib.update_shape_on_walk,
-			{name = slope_name .. '_upd_shape',
-			chance = update_chance, priority = 500})
+	return node_def
+end
+
+function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
+	local base_node_def = minetest.registered_nodes[base_node_name]
+	if not base_node_def then
+		minetest.log("error", "Trying to get slopes for an unknown node " .. (base_node_name or "nil"))
+		return
 	end
-	return slope_name
+	local full_copy = table.copy(base_node_def)
+	for key, value in pairs(def_changes) do
+		if value == "nil" then
+			full_copy[key] = nil
+		else
+			full_copy[key] = value
+		end
+	end
+	-- Use a copy because tables are passed by reference. Otherwise the node
+	-- description is shared and updated after each call
+	return {
+		get_straight_def(base_node_name, table.copy(full_copy)),
+		get_inner_def(base_node_name, table.copy(full_copy)),
+		get_outer_def(base_node_name, table.copy(full_copy)),
+		get_pike_def(base_node_name, table.copy(full_copy))
+	}
 end
 
 --- Register slopes from a full block node.
@@ -264,14 +244,29 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 			full_copy[key] = value
 		end
 	end
-	-- Use a copy because tables are passed by reference. Otherwise the node
-	-- description is shared and updated even after minetest.register_node
-	local str_name = register_slope_straight(base_node_name, table.copy(full_copy), update_chance)
-	local ic_name = register_slope_inner(base_node_name, table.copy(full_copy), update_chance)
-	local oc_name = register_slope_outer(base_node_name, table.copy(full_copy), update_chance)
-	local pk_name = register_slope_pike(base_node_name, table.copy(full_copy), update_chance)
-	add_replacement(base_node_name, update_chance)
-	-- Enable on walk update
+	-- Get new definitions
+	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
+	local slope_names = {
+		naturalslopeslib.get_straight_slope_name(subname),
+		naturalslopeslib.get_inner_corner_slope_name(subname),
+		naturalslopeslib.get_outer_corner_slope_name(subname),
+		naturalslopeslib.get_pike_slope_name(subname)
+	}
+	local slope_defs = naturalslopeslib.get_slope_defs(base_node_name, full_copy)
+	-- Register all slopes
+	for i, name in ipairs(slope_names) do
+		minetest.register_node(name, slope_defs[i])
+		-- Register walk listener
+		if naturalslopeslib.setting_enable_shape_on_walk() then
+			poschangelib.register_stomp(name,
+				naturalslopeslib.update_shape_on_walk,
+				{name = name .. '_upd_shape',
+				chance = update_chance, priority = 500})
+		end
+	end
+	-- Register replacements
+	add_replacement(base_node_name, update_chance, slope_names)
+	-- Enable on walk update for base node
 	if naturalslopeslib.setting_enable_shape_on_walk() then
 		poschangelib.register_stomp(base_node_name,
 			naturalslopeslib.update_shape_on_walk,

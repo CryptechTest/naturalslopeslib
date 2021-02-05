@@ -26,8 +26,9 @@ function naturalslopeslib.get_regular_node_name(node_name)
 	end
 	return nil
 end
---- Get node name for slopes from a subname.
+--- {Private} Get the default node name for slopes from a subname.
 -- For example 'dirt' will be named 'naturalslopeslib:slope_dirt'
+-- See naturalslopeslib.get_all_shapes to get the actual node names.
 function naturalslopeslib.get_straight_slope_name(subname)
 	return minetest.get_current_modname() .. ':slope_' .. subname
 end
