@@ -224,7 +224,7 @@ function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
 end
 
 local function default_factors(factors)
-	f = {}
+	local f = {}
 	if factors == nil then factors = {} end
 	for _, name in ipairs({"mapgen", "time", "stomp", "place"}) do
 		if factors[name] ~= nil then
