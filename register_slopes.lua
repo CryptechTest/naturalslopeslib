@@ -293,7 +293,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	-- Enable surface update
 	if naturalslopeslib.setting_enable_surface_update() then
 		twmlib.register_twm({
-			nodenames = {base_node_name, str_name, ic_name, oc_name, pk_name},
+			nodenames = {base_node_name, slope_defs[1], slope_defs[2], slope_defs[3], slope_defs[4]},
 			chance = update_chance * chance_factors.time,
 			action = naturalslopeslib.update_shape
 		})
