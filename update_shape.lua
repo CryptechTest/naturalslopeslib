@@ -213,11 +213,15 @@ Do the replacement
 --]]
 
 -- Do shape update when random roll passes on a single node.
-function naturalslopeslib.chance_update_shape(pos, node, factor)
+function naturalslopeslib.chance_update_shape(pos, node, factor, type)
 	if factor == nil then factor = 1 end
 	local replacement = naturalslopeslib.get_replacement(node.name)
 	if not replacement then return false end
-	if (math.random() * (replacement.chance * factor)) < 1.0 then
+	local chance_factor = 1
+	if type == "mapgen" or type == "stomp" or type == "place" or type == "time" then
+		chance_factor = replacement.chance_factors[type]
+	end
+	if (math.random() * (replacement.chance * factor * chance_factor)) < 1.0 then
 		return naturalslopeslib.update_shape(pos, node)
 	end
 	return false
@@ -280,10 +284,10 @@ end
 -- @param mapx Higher boundary of area.
 -- @param factor Factor for chance (0.1 means 10 times more likely to update)
 -- @param skip (optional) Don't parse all nodes, skip randomly skip/2 to skip nodes
--- @param start_i (optional) Hidden parameter to finish progressive updates
 -- @param progressive_edges (optional) When true, edges are generated progressively (default)
+-- @param type (optional) Transformation type for chance factor.
 -- at every loop.
-function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, progressive_edges)
+function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, progressive_edges, type)
 	if not skip then skip = 0 end
 	if progressive_edges == nil then progressive_edges = true end
 	-- Run on every block
@@ -297,7 +301,7 @@ function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, pro
 	if progressive_edges then
 		local edges = get_edges(minp, maxp)
 		for _, edge in ipairs(edges) do
-			naturalslopeslib.register_progressive_area_update(edge[1], edge[2], factor, skip, {x = edge[3][1], y = edge[3][2], z = edge[3][3]})
+			naturalslopeslib.register_progressive_area_update(edge[1], edge[2], factor, skip, type, {x = edge[3][1], y = edge[3][2], z = edge[3][3]})
 		end
 	end
 	while i <= imax do
@@ -308,12 +312,18 @@ function naturalslopeslib.area_chance_update_shape(minp, maxp, factor, skip, pro
 			-- Skip edges
 		else
 			local replacement = naturalslopeslib.get_replacement_id(data[i])
-			if replacement and (math.random() * (replacement.chance * factor)) < 1.0 then
-				local new_data = naturalslopeslib.get_replacement_node(i, data[i], area, data, param2_data)
-				if new_data then
-					data[i] = new_data.id
-					if new_data.param2_data then
-						param2_data[i] = new_data.param2_data
+			if replacement ~= nil then
+				local chance_factor = 1
+				if type == "mapgen" or type == "stomp" or type == "place" or type == "time" then
+					chance_factor = replacement.chance_factors[type]
+				end
+				if math.random() * (replacement.chance * factor * chance_factor) < 1.0 then
+					local new_data = naturalslopeslib.get_replacement_node(i, data[i], area, data, param2_data)
+					if new_data then
+						data[i] = new_data.id
+						if new_data.param2_data then
+							param2_data[i] = new_data.param2_data
+						end
 					end
 				end
 			end
@@ -327,7 +337,7 @@ end
 
 naturalslopeslib.progressive_area_updates = {}
 
-function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip, edge_normal)
+function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, skip, type, edge_normal)
 	if edge_normal ~= nil or minp.x == maxp.x or minp.y == maxp.y or minp.z == maxp.z then
 		-- Explicit edge or ignored
 		table.insert(naturalslopeslib.progressive_area_updates, {minp = minp, maxp = maxp,
@@ -345,7 +355,7 @@ function naturalslopeslib.register_progressive_area_update(minp, maxp, factor, s
 	for _, edge in ipairs(edges) do
 		table.insert(naturalslopeslib.progressive_area_updates, {
 				minp = edge[1], maxp = edge[2],
-				factor = factor, skip = skip, i = 1,
+				factor = factor, type = type, skip = skip, i = 1,
 				edge_normal = {x = edge[3][1], y = edge[3][2], z = edge[3][3]}
 		})
 	end
@@ -429,7 +439,7 @@ local function progressive_area_update(start_time)
 		local z = (i - 1) % (z_size)
 		local pos = {x = area.minp.x + x, y = area.minp.y + y, z = area.minp.z + z}
 		local node = minetest.get_node(pos)
-		naturalslopeslib.chance_update_shape(pos, node, area.factor)
+		naturalslopeslib.chance_update_shape(pos, node, area.factor, area.type)
 		i = i + 1 + math.random(area.skip / 2, area.skip)
 		if (os.clock() - start_time) > 0.1 and i <= imax then
 			area.i = i
@@ -458,7 +468,7 @@ minetest.register_on_shutdown(function()
 		minetest.log("info", "Processing slope generation for queued areas")
 		for i, area in ipairs(naturalslopeslib.progressive_area_updates) do
 			minetest.log("info", (#naturalslopeslib.progressive_area_updates - i + 1) .. " remaining area(s)")
-			naturalslopeslib.area_chance_update_shape(area.minp, area.maxp, area.factor, area.skip, false)
+			naturalslopeslib.area_chance_update_shape(area.minp, area.maxp, area.factor, area.skip, false, area.type)
 		end
 	end
 end)
@@ -496,11 +506,11 @@ local function register_on_generation()
 	if naturalslopeslib.setting_enable_shape_on_generation() then
 		if naturalslopeslib.setting_generation_method() == "Progressive" then
 			minetest.register_on_generated(function(minp, maxp, seed)
-				naturalslopeslib.register_progressive_area_update(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+				naturalslopeslib.register_progressive_area_update(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip(), "mapgen")
 			end)
 		else
 			minetest.register_on_generated(function(minp, maxp, seed)
-				naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip())
+				naturalslopeslib.area_chance_update_shape(minp, maxp, naturalslopeslib.setting_generation_factor(), naturalslopeslib.setting_generation_skip(), true, "mapgen")
 			end)
 		end
 	end
@@ -511,7 +521,7 @@ minetest.register_on_mods_loaded(register_on_generation)
 local function on_place_or_dig(pos, force_below)
 	local function update(pos, x, y, z, factor)
 		local new_pos = vector.add(pos, vector.new(x, y, z))
-		naturalslopeslib.chance_update_shape(new_pos, minetest.get_node(new_pos), factor)
+		naturalslopeslib.chance_update_shape(new_pos, minetest.get_node(new_pos), factor, "place")
 	end
 	-- Update 8 neighbors plus above and below
 	update(pos, 0, 0, 0)

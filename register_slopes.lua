@@ -3,7 +3,7 @@
 -- Populated on slope node registration with add_replacement
 local replacements = {}
 local replacement_ids = {}
-local function add_replacement(source_name, update_chance, fixed_replacements)
+local function add_replacement(source_name, update_chance, chance_factors, fixed_replacements)
 	local subname = string.sub(source_name, string.find(source_name, ':') + 1)
 	local straight_name = nil
 	local ic_name = nil
@@ -32,7 +32,8 @@ local function add_replacement(source_name, update_chance, fixed_replacements)
 		inner = ic_name,
 		outer = oc_name,
 		pike = pike_name,
-		chance = update_chance
+		chance = update_chance,
+		chance_factors = chance_factors
 	}
 	local dest_data_id = {
 		source = source_id,
@@ -40,7 +41,8 @@ local function add_replacement(source_name, update_chance, fixed_replacements)
 		inner = ic_id,
 		outer = oc_id,
 		pike = pike_id,
-		chance = update_chance
+		chance = update_chance,
+		chance_factors = chance_factors
 	}
 	-- Block
 	replacements[source_name] = dest_data
@@ -221,12 +223,26 @@ function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
 	}
 end
 
+local function default_factors(factors)
+	f = {}
+	if factors == nil then factors = {} end
+	for _, name in ipairs({"mapgen", "time", "stomp", "place"}) do
+		if factors[name] ~= nil then
+			f[name] = factors[name]
+		else
+			f[name] = 1
+		end
+	end
+	return f
+end
+
 --- Register slopes from a full block node.
 -- @param base_node_name: The full block node name.
 -- @param node_desc: base for slope node descriptions.
 -- @param update_chance: inverted chance for the node to be updated.
+-- @param factors (optional): chance factor for each type.
 -- @return Table of slope names: [straight, inner, outer, pike] or nil on error.
-function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance)
+function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors)
 	if not update_chance then
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
@@ -244,6 +260,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 			full_copy[key] = value
 		end
 	end
+	local chance_factors = default_factors(factors)
 	-- Get new definitions
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
 	local slope_names = {
@@ -261,23 +278,23 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 			poschangelib.register_stomp(name,
 				naturalslopeslib.update_shape_on_walk,
 				{name = name .. '_upd_shape',
-				chance = update_chance, priority = 500})
+				chance = update_chance * chance_factors.stomp, priority = 500})
 		end
 	end
 	-- Register replacements
-	add_replacement(base_node_name, update_chance, slope_names)
+	add_replacement(base_node_name, update_chance, chance_factors, slope_names)
 	-- Enable on walk update for base node
 	if naturalslopeslib.setting_enable_shape_on_walk() then
 		poschangelib.register_stomp(base_node_name,
 			naturalslopeslib.update_shape_on_walk,
 			{name = base_node_name .. '_upd_shape',
-			chance = update_chance, priority = 500})
+			chance = update_chance * chance_factors.stomp, priority = 500})
 	end
 	-- Enable surface update
 	if naturalslopeslib.setting_enable_surface_update() then
 		twmlib.register_twm({
 			nodenames = {base_node_name, str_name, ic_name, oc_name, pk_name},
-			chance = update_chance,
+			chance = update_chance * chance_factors.time,
 			action = naturalslopeslib.update_shape
 		})
 	end
@@ -285,7 +302,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 end
 
 --- Add a slopping behaviour to existing nodes.
-function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance)
+function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors)
 	-- Defensive checks
 	if not minetest.registered_nodes[base_node_name] then
 		if not base_node_name then
@@ -306,21 +323,22 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
 	end
+	local chance_factors = default_factors(factors)
 	-- Set shape update data
 	local slope_names = {straight_name, inner_name, outer_name, pike_name}
-	add_replacement(base_node_name, update_chance, slope_names)
+	add_replacement(base_node_name, update_chance, chance_factors, slope_names)
 	-- Set surface update
 	if naturalslopeslib.setting_enable_surface_update() then
 		twmlib.register_twm({
 			nodenames = {base_node_name, straight_name, inner_name, outer_name, pike_name},
-			chance = update_chance,
+			chance = update_chance * chance_factors.time,
 			action = naturalslopeslib.update_shape
 		})
 	end
 	-- Set walk listener for the 5 nodes
 	if naturalslopeslib.setting_enable_shape_on_walk() then
 		local stomp_desc = {name = base_node_name .. '_upd_shape',
-			chance = update_chance, priority = 500}
+			chance = update_chance * chance_factors.stomp, priority = 500}
 		poschangelib.register_stomp(base_node_name, naturalslopeslib.update_shape_on_walk, stomp_desc)
 		for i, name in pairs(slope_names) do
 			poschangelib.register_stomp(name, naturalslopeslib.update_shape_on_walk, stomp_desc)
