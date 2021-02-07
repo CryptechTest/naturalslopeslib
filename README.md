@@ -1,7 +1,7 @@
 Natural slopes library
 ======================
 
-* Version 1.0
+* Version 1.1
 * Licence LGPLv2 or, at your discretion, any later version.
 * With thanks to all modders, mainly from the stairs mod for study.
 * Models licensed under CC-0.
