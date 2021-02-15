@@ -10,6 +10,7 @@ Table of contents
 ---- naturalslopeslib.register_slope
 ---- naturalslopeslib.set_slopes
 ---- naturalslopeslib.register_sloped_stomp
+---- naturalslopeslib.propagate_overrides
 -- Getters
 ---- naturalslopeslib.get_slope_defs
 ---- naturalslopeslib.get_regular_node_name
@@ -73,6 +74,8 @@ for i, def in ipairs(slope_defs) do
 end
 naturalslopeslib.set_slopes("default:dirt", slope_names[1], slope_names[2], slope_names[3], slope_names[4], factors)
 
+Regarding dependencies, the slopes are defined by copying the current definition of the original node. This means that modifications applied to the original node after the slopes are registered are not applied to slopes. If you want the slopes to act like the original nodes no matter what happen to their definition, you can call naturalslopes.propagate_overrides() before or after registering slopes. That way all future call to minetest.override_item (even from other unknown mods) will also apply to slopes silently, removing the need to explicitely define mod requirements.
+
 
 Definitions
 -----------
@@ -129,6 +132,11 @@ Warning: The palette for slopes can only have 8 colors while the original one ca
 
 * Requires `poschangelib`. If the mod is not installed, this function will do nothing.
 * Register `stomp_desc` from all shapes of `source_node_name` to `dest_node_name`.
+
+### naturalslopeslib.propagate_overrides()
+
+* Once called, calling minetest.override_item from that point will also apply the modifications to the corresponding slopes. Once called, this behaviour cannot be disabled.
+
 
 Getters
 -------

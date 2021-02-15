@@ -1,6 +1,7 @@
 -- Global namespace for functions
 naturalslopeslib = {
-	_register_on_generated = true
+	_register_on_generated = true,
+	_propagate_overrides = false
 }
 
 local poschangelib_available = false
@@ -84,6 +85,40 @@ end
 
 function naturalslopeslib.set_manual_map_generation()
 	naturalslopeslib._register_on_generated = false
+end
+
+function naturalslopeslib.propagate_overrides()
+	if naturalslopeslib._propagate_overrides then
+		return
+	end
+	naturalslopeslib._propagate_overrides = true
+	local old_override = minetest.override_item
+	minetest.override_item = function(name, redefinition)
+		local shapes = naturalslopeslib.get_all_shapes(name)
+		if #shapes == 1 then
+			old_override(name, redefinition)
+			return
+		end
+		local slope_redef = table.copy(redefinition)
+		-- Prevent slopes fixed attribute override
+		slope_redef.drawtype = nil
+		slope_redef.nodebox = nil
+		slope_redef.mesh = nil
+		slope_redef.selection_box = nil
+		slope_redef.collision_box = nil
+		slope_redef.paramtype = nil
+		if slope_redef.paramtype2 ~= nil then
+			if slope_redef.paramtype2 == "color" or slope_redef.paramtype2 == "colorfacedir" then
+				slope_redef.paramtype2 = "colorfacedir"
+			else
+				slope_redef.paramtype2 = "facedir"
+			end
+		end
+		old_override(name, redefinition)
+		for i=2, #shapes, 1 do
+			old_override(shapes[i], slope_redef)
+		end
+	end
 end
 
 dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
