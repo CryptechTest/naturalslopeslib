@@ -103,13 +103,15 @@ Registration API
     * `drawtype` set to "nodebox" or "mesh" according to the rendering mode
     * `nodebox` or `mesh` is replaced
     * `selection_box` and `collision_box` matching to the according mesh
-    * `paramtype` and `paramtype2` set to "light" and "facedir" respectively
+    * `paramtype` is set to "light", and `paramtype2` to "facedir" or "colorfacedir"
     * the group "natural_slope" is added (1 = straight, 2 = inner corner, 3 = outer corner, 4 = pike)
     * the group "family:<full node name>" is added
   * Then they are changed from def_changes. Use "nil" string to explicitely erase a value (an not nil).
 * `update_chance` inverted chance for the node to be updated.
 * `factors` optional table for chance factors. By default each factor is 1.
 * returns ReplacementTable.
+
+Warning: The palette for slopes can only have 8 colors while the original one can hold up to 256 colors. A reduced palette must be provided for nodes which paramtype2 is "color" even if not all colors are used.
 
 ### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors)
 
@@ -139,11 +141,13 @@ Getters
     * `drawtype` set to "nodebox" or "mesh" according to the rendering mode
     * `nodebox` or `mesh` is replaced
     * `selection_box` and `collision_box` matching to the according mesh
-    * `paramtype` and `paramtype2` set to "light" and "facedir" respectively
+    * `paramtype` is set to "light", and `paramtype2` to "facedir" or "colorfacedir"
     * the group "natural_slope" is added (1 = straight, 2 = inner corner, 3 = outer corner, 4 = pike)
     * the group "family:<full node name>" is added
   * Then they are changed from def_changes. Use "nil" string to explicitely erase a value (an not nil).
 * returns a table of node definitions for straight slope, inner corner, outer corner and pike in that order.
+
+Warning: The palette for slopes can only have 8 colors while the original one can hold up to 256 colors. A reduced palette must be provided for nodes which paramtype2 is "color" even if not all colors are used.
 
 ### naturalslopeslib.get_regular_node_name(slope_node_name)
 

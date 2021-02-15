@@ -115,8 +115,24 @@ local slope_pike_box = {
 	},
 }
 
+local function apply_default_slope_def(base_node_name, node_def, slope_group_value)
+	node_def.paramtype = 'light'
+	if node_def.paramtype2 == 'color' or node_def.paramtype2 == 'colorfacedir' then
+		node_def.paramtype2 = 'colorfacedir'
+	else
+		node_def.paramtype2 = 'facedir'
+	end
+	if not node_def.groups then node_def.groups = {} end
+	node_def.groups.natural_slope = slope_group_value
+	if not node_def.groups["family:" .. base_node_name] then
+		node_def.groups["family:" .. base_node_name] = 1
+	end
+	return node_def
+end
+
 --- {Private} Update the node definition for a straight slope
 local function get_straight_def(base_node_name, node_def)
+	node_def = apply_default_slope_def(base_node_name, node_def, 1)
 	if naturalslopeslib.setting_smooth_rendering() then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_straight.obj'
@@ -126,18 +142,12 @@ local function get_straight_def(base_node_name, node_def)
 	end
 	node_def.selection_box = slope_straight_box
 	node_def.collision_box = slope_straight_box
-	node_def.paramtype = 'light'
-	node_def.paramtype2 = 'facedir'
-	if not node_def.groups then node_def.groups = {} end
-	node_def.groups.natural_slope = 1
-	if not node_def.groups["family:" .. base_node_name] then
-		node_def.groups["family:" .. base_node_name] = 1
-	end
 	return node_def
 end
 
 --- {Private} Update the node definition for an inner corner
 local function get_inner_def(base_node_name, node_def)
+	node_def = apply_default_slope_def(base_node_name, node_def, 2)
 	if naturalslopeslib.setting_smooth_rendering() then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_inner.obj'
@@ -147,18 +157,12 @@ local function get_inner_def(base_node_name, node_def)
 	end
 	node_def.selection_box = slope_inner_corner_box
 	node_def.collision_box = slope_inner_corner_box
-	node_def.paramtype = 'light'
-	node_def.paramtype2 = 'facedir'
-	if not node_def.groups then node_def.groups = {} end
-	node_def.groups.natural_slope = 2
-	if not node_def.groups["family:" .. base_node_name] then
-		node_def.groups["family:" .. base_node_name] = 1
-	end
 	return node_def
 end
 
 --- {Private} Update the node definition for an outer corner
 local function get_outer_def(base_node_name, node_def)
+	node_def = apply_default_slope_def(base_node_name, node_def, 3)
 	if naturalslopeslib.setting_smooth_rendering() then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_outer.obj'
@@ -168,18 +172,12 @@ local function get_outer_def(base_node_name, node_def)
 	end
 	node_def.selection_box = slope_outer_corner_box
 	node_def.collision_box = slope_outer_corner_box
-	node_def.paramtype = 'light'
-	node_def.paramtype2 = 'facedir'
-	if not node_def.groups then node_def.groups = {} end
-	node_def.groups.natural_slope = 3
-	if not node_def.groups["family:" .. base_node_name] then
-		node_def.groups["family:" .. base_node_name] = 1
-	end
 	return node_def
 end
 
 --- {Private} Update the node definition for a pike
 local function get_pike_def(base_node_name, node_def, update_chance)
+	node_def = apply_default_slope_def(base_node_name, node_def, 4)
 	if naturalslopeslib.setting_smooth_rendering() then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_pike.obj'
@@ -189,13 +187,6 @@ local function get_pike_def(base_node_name, node_def, update_chance)
 	end
 	node_def.selection_box = slope_pike_box
 	node_def.collision_box = slope_pike_box
-	node_def.paramtype = 'light'
-	node_def.paramtype2= 'facedir'
-	if not node_def.groups then node_def.groups = {} end
-	node_def.groups.natural_slope = 4
-	if not node_def.groups["family:" .. base_node_name] then
-		node_def.groups["family:" .. base_node_name] = 1
-	end
 	return node_def
 end
 
