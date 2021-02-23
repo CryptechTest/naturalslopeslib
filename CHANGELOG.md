@@ -3,6 +3,18 @@ Changelog
 
 The semantic of version number is 'Major.minor'. Minor updates are retro-compatible, while major updates may break things.
 
+[1.2] - 2021-02-23
+------------------
+
+### Added
+- Support for colored nodes (with palette size limitation).
+- `naturalslopeslib.propagate_overrides` to remove the need for depedencies.
+- Stomp, dig/place and time factor in settings.
+
+### Fixed
+- Timed update triggering.
+- Some local variable declaration warning.
+
 
 [1.1] - 2021-02-07
 ------------------

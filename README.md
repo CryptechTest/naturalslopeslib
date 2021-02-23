@@ -1,20 +1,8 @@
 Natural slopes library
 ======================
 
-* Version 1.1
-* Licence LGPLv2 or, at your discretion, any later version.
+* Version 1.2
 * With thanks to all modders, mainly from the stairs mod for study.
-* Models licensed under CC-0.
-
-## Dependencies
-
-None, this is a standalone library for other mods to build upon. It doesn't
-have any effect by itself.
-
-## Optional dependencies:
-
-* poschangelib: to enable shape update when walking on nodes
-* twmlib: to enable update from time to time
 
 This mod add the ability for nodes to turn into slopes and back to full block
 shape by themselves according to the surroundings and the material hardness. It creates
@@ -29,35 +17,35 @@ Thus half-blocks like slopes are still considered as a single block. A single sl
 can turn back to a full node and vice-versa and half-blocks are not considered
 buildable upon (they will transform back into full block).
 
+See naturalslopeslib_api.txt for the documentation of the API.
 
-How to define new slopes
-------------------------
+## Dependencies
 
-Call naturalslopeslib.register_slope to declare new slope nodes. This will also
-automatically bind shape update events on the original node and the newly
-created slopes. And that's it.
+None, this is a standalone library for other mods to build upon. It doesn't
+have any effect by itself.
 
-### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance)
+## Optional dependencies:
 
-- base_node_name: the name of the original node
-- def_changes: the node definition for the slopes is copied from the original.
-    Properties that are set there are overwritten for slopes.
-- update_chance: inverted chance to the node to update it's shape when an update event
-    occurs on it.
+* poschangelib: to enable shape update when walking on nodes
+* twmlib: to enable update from time to time
 
+## Source code
 
-How to register only the behaviour
-----------------------------------
+* Written by Karamel
+* Licenced under LGPLv2 or, at your discretion, any later version.
 
-If all the slope nodes are already registered nodes, you must use an other
-function to link them.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 2.1 of the License, or
+(at your option) any later version.
 
-### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name)
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
 
-- base_node_name: The full node name
-- straight_name: The straight slope node name
-- inner_name: The inner corner node name
-- outer_name: The outer corner node name
-- pike_name: The pike node name
+https://www.gnu.org/licenses/licenses.html#LGPL
 
-See naturalslopeslib_api.txt for more details and other functions.
+## Media
+
+* Models licensed under CC-0.
