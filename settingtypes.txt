@@ -22,8 +22,21 @@ naturalslopeslib_enable_shape_on_generate (Shape update on generation) bool true
 naturalslopeslib_generation_method (Generation method) enum VoxelManip VoxelManip,Progressive
 
 # Inverted chance factor on generation. The lesser, the more likely the node will be
-# generated in their updated shape. 0.1 means 10 time more likely.
+# generated in their updated shape. 0.1 means 10 times more likely.
 naturalslopeslib_update_shape_generate_factor (Generation factor) float 0.05 0
+
+# Inverted chance factor when stomping. The lesser, the more likely the node will be
+# updated when walking on it. 0.1 means 10 times more likely.
+naturalslopeslib_update_shape_stomp_factor (Stomp factor) float 1.0 0
+
+# Inverted chance factor on digging/placing. The lesser, the more likely the
+# nodes will be updated when the neighbour nodes change. 0.1 means 10 times
+# more likely.
+naturalslopeslib_update_shape_dig_place_factor (Dig/place factor) float 1.0 0
+
+# Inverted chance factor on time. The lesser, the more likely the node will be
+# updated with time. 0.1 means 10 times more likely.
+naturalslopeslib_update_shape_time_factor (Time factor) float 1.0 0
 
 # Skip n nodes when generating an area. The higher, the less nodes can be updated but it dramatically saves server resources.
 naturalslopeslib_update_shape_generate_skip (Generation skip nodes) int 0 0

@@ -524,19 +524,20 @@ local function on_place_or_dig(pos, force_below)
 		naturalslopeslib.chance_update_shape(new_pos, minetest.get_node(new_pos), factor, "place")
 	end
 	-- Update 8 neighbors plus above and below
-	update(pos, 0, 0, 0)
-	update(pos, 1, 0, 0)
-	update(pos, 0, 0, 1)
-	update(pos, -1, 0, 0)
-	update(pos, 0, 0, -1)
-	update(pos, 1, 0, 1)
-	update(pos, 1, 0, -1)
-	update(pos, -1, 0, 1)
-	update(pos, -1, 0, -1)
+	local place_factor = naturalslopeslib.setting_dig_place_factor()
+	update(pos, 0, 0, 0, place_factor)
+	update(pos, 1, 0, 0, place_factor)
+	update(pos, 0, 0, 1, place_factor)
+	update(pos, -1, 0, 0, place_factor)
+	update(pos, 0, 0, -1, place_factor)
+	update(pos, 1, 0, 1, place_factor)
+	update(pos, 1, 0, -1, place_factor)
+	update(pos, -1, 0, 1, place_factor)
+	update(pos, -1, 0, -1, place_factor)
 	if force_below then update(pos, 0, -1, 0, 0)
-	else update(pos, 0, -1, 0)
+	else update(pos, 0, -1, 0, place_factor)
 	end
-	update(pos, 0, 1, 0)
+	update(pos, 0, 1, 0, place_factor)
 end
 
 if naturalslopeslib.setting_enable_shape_on_dig_place() then

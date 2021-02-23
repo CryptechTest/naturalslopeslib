@@ -262,6 +262,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	}
 	local slope_defs = naturalslopeslib.get_slope_defs(base_node_name, full_copy)
 	-- Register all slopes
+	local stomp_factor = naturalslopeslib.setting_stomp_factor()
 	for i, name in ipairs(slope_names) do
 		minetest.register_node(name, slope_defs[i])
 		-- Register walk listener
@@ -269,7 +270,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 			poschangelib.register_stomp(name,
 				naturalslopeslib.update_shape_on_walk,
 				{name = name .. '_upd_shape',
-				chance = update_chance * chance_factors.stomp, priority = 500})
+				chance = update_chance * chance_factors.stomp * stomp_factor, priority = 500})
 		end
 	end
 	-- Register replacements
@@ -279,13 +280,14 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 		poschangelib.register_stomp(base_node_name,
 			naturalslopeslib.update_shape_on_walk,
 			{name = base_node_name .. '_upd_shape',
-			chance = update_chance * chance_factors.stomp, priority = 500})
+			chance = update_chance * chance_factors.stomp * stomp_factor, priority = 500})
 	end
 	-- Enable surface update
+	local time_factor = naturalslopeslib.setting_time_factor()
 	if naturalslopeslib.setting_enable_surface_update() then
 		twmlib.register_twm({
 			nodenames = {base_node_name, slope_defs[1], slope_defs[2], slope_defs[3], slope_defs[4]},
-			chance = update_chance * chance_factors.time,
+			chance = update_chance * chance_factors.time * time_factor,
 			action = naturalslopeslib.update_shape
 		})
 	end
@@ -320,16 +322,18 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 	add_replacement(base_node_name, update_chance, chance_factors, slope_names)
 	-- Set surface update
 	if naturalslopeslib.setting_enable_surface_update() then
+		local time_factor = naturalslopeslib.setting_time_factor()
 		twmlib.register_twm({
 			nodenames = {base_node_name, straight_name, inner_name, outer_name, pike_name},
-			chance = update_chance * chance_factors.time,
+			chance = update_chance * chance_factors.time * time_factor,
 			action = naturalslopeslib.update_shape
 		})
 	end
 	-- Set walk listener for the 5 nodes
 	if naturalslopeslib.setting_enable_shape_on_walk() then
+		local stomp_factor = naturalslopeslib.setting_stomp_factor()
 		local stomp_desc = {name = base_node_name .. '_upd_shape',
-			chance = update_chance * chance_factors.stomp, priority = 500}
+			chance = update_chance * chance_factors.stomp * stomp_factor, priority = 500}
 		poschangelib.register_stomp(base_node_name, naturalslopeslib.update_shape_on_walk, stomp_desc)
 		for i, name in pairs(slope_names) do
 			poschangelib.register_stomp(name, naturalslopeslib.update_shape_on_walk, stomp_desc)

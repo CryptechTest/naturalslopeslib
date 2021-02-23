@@ -69,6 +69,15 @@ end
 function naturalslopeslib.setting_generation_factor()
 	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_factor')) or 0.05
 end
+function naturalslopeslib.setting_stomp_factor()
+	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_stomp_factor')) or 1.0
+end
+function naturalslopeslib.setting_dig_place_factor()
+	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_dig_place_factor')) or 1.0
+end
+function naturalslopeslib.setting_time_factor()
+	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_time_factor')) or 1.0
+end
 function naturalslopeslib.setting_generation_skip()
 	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_skip')) or 0
 end

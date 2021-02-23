@@ -34,6 +34,9 @@ Table of contents
 ---- naturalslopeslib.setting_enable_shape_on_generation
 ---- naturalslopeslib.setting_generation_method
 ---- naturalslopeslib.setting_generation_factor
+---- naturalslopeslib.setting_stomp_factor
+---- naturalslopeslib.setting_dig_place_factor
+---- naturalslopeslib.setting_time_factor
 ---- naturalslopeslib.setting_generation_skip
 ---- naturalslopeslib.setting_enable_shape_on_dig_place
 ---- naturalslopeslib.setting_smooth_rendering
@@ -291,6 +294,20 @@ These functions get the current settings with the default value if not set.
 ### naturalslopeslib.setting_generation_factor()
 
 * Returns the chance factor for map generation to reflect the landscape age. It is cumulative with the "mapgen" chance factor of each node if any is defined. It may not reflect the actual behaviour if the default mapgen behaviour was disabled by naturalslopeslib.set_manual_map_generation.
+
+### naturalslopeslib.setting_stomp_factor()
+
+* Returns the chace factor when walking on nodes. It is cumulative with the "stomp" chance factor of each node if any is defined.
+* This factor is applied upon node registration.
+
+### naturalslopeslib.setting_dig_place_factor()
+
+* Returns the chace factor when the neighbouring nodes change. It is cumulative with the "place" chance factor of each node if any is defined.
+
+### naturalslopeslib.setting_time_factor()
+
+* Returns the chace factor on timed update. It is cumulative with the "time" chance factor of each node if any is defined.
+* This factor is applied upon node registration.
 
 ### naturalslopeslib.setting_generation_skip()
 
