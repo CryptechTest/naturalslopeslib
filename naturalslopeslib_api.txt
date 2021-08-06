@@ -7,6 +7,8 @@ Table of contents
 -- Definitions
 ---- ReplacementTable
 -- Registration API
+---- naturalslopeslib.default_definition
+---- naturalslopeslib.reset_defaults
 ---- naturalslopeslib.register_slope
 ---- naturalslopeslib.set_slopes
 ---- naturalslopeslib.register_sloped_stomp
@@ -99,6 +101,32 @@ A table containing references to various shape. The type of references can eithe
 
 Registration API
 ----------------
+
+### naturalslopeslib.default_definition
+
+This tables holds default definition override for newly registered slopes. When using register_slope, they are added to def_changes if not already set to avoid copy/pasting a lot of things and automate some behaviours.
+
+{
+	drop_source = true/false
+	-- When true, if no drop is defined, it is set to the source node instead of the slope.
+	-- For example, digging a dirt slope gives a dirt block (when true) or the dirt slope (when false)
+	tiles = {{align_style="world"}}
+	-- As for tile definitions, the list can hold up to 6 values,
+	-- but only align_style, backface_culling and scale are read.
+	groups = {not_in_creative_inventory = 1}
+	-- The list of groups to add with their value. Set a group value to 0 to remove it
+	other keys
+	-- Override this key when no change is explicitely set.
+}
+
+Note that changes to default_definitions are not retroactives. If the defaults are changed on the run, all slopes that were previously registered are not affected.
+
+Good practices are setting the defaults before registering your slopes, then calling naturalslopeslib.reset_defaults() to prevent your settings to effect further declarations.
+
+### naturalslopeslib.reset_defaults()
+
+* Resets naturalslopeslib.default_definition to the less-impacting values.
+* These defaults are as follow {drop_source = false, tiles = {}, groups = {}}
 
 ### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors)
 

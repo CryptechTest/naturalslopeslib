@@ -190,6 +190,17 @@ local function get_pike_def(base_node_name, node_def, update_chance)
 	return node_def
 end
 
+-- Expand `tiles` to use the {name = "image"} format for each tile
+local function convert_to_expanded_tiles_def(tiles)
+	if tiles then
+		for i, tile_def in ipairs(tiles) do
+			if type(tile_def) == "string" then
+				tiles[i] = {name = tile_def}
+			end
+		end
+	end
+end
+
 function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
 	local base_node_def = minetest.registered_nodes[base_node_name]
 	if not base_node_def then
@@ -197,11 +208,73 @@ function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
 		return
 	end
 	local full_copy = table.copy(base_node_def)
+	local changes_copy = table.copy(def_changes)
 	for key, value in pairs(def_changes) do
 		if value == "nil" then
 			full_copy[key] = nil
 		else
 			full_copy[key] = value
+		end
+	end
+	-- Handle default drop overrides
+	if not base_node_def.drop and not def_changes.drop and naturalslopeslib.default_definition.drop_source then
+		-- If drop is not set and was not reseted
+		full_copy.drop = base_node_name
+	end
+	-- Convert all tile definition to the list format to be able to override properties
+	if not full_copy.tiles or #full_copy.tiles == 0 then
+		full_copy.tiles = {{}}
+	end
+	convert_to_expanded_tiles_def(full_copy.tiles)
+	if not changes_copy.tiles or #changes_copy.tiles == 0 then
+		changes_copy.tiles = {{}}
+	end
+	convert_to_expanded_tiles_def(changes_copy.tiles)
+	local default_tile_changes = table.copy(naturalslopeslib.default_definition.tiles)
+	if not default_tile_changes or #default_tile_changes == 0 then
+		default_tile_changes = {{}}
+	end
+	convert_to_expanded_tiles_def(default_tile_changes)	
+	-- Make tile changes and default changes the same size
+	local desired_size = math.max(#full_copy.tiles, #changes_copy.tiles, #default_tile_changes)
+	while #changes_copy.tiles < desired_size do
+		table.insert(changes_copy.tiles, table.copy(changes_copy.tiles[#changes_copy.tiles]))
+	end
+	while #default_tile_changes < desired_size do
+		-- no need to copy because defaults won't be alterated
+		table.insert(default_tile_changes, default_tile_changes[#default_tile_changes])
+	end
+	while #full_copy.tiles < desired_size do
+		table.insert(full_copy.tiles, table.copy(full_copy.tiles[#full_copy.tiles]))
+	end
+	-- Apply default tile changes
+	for i = 1, desired_size, 1 do
+		if default_tile_changes[i].align_style ~= nil and changes_copy.tiles[i].align_style == nil then
+			full_copy.tiles[i].align_style = default_tile_changes[i].align_style
+		end
+		if default_tile_changes[i].backface_culling ~= nil and changes_copy.tiles[i].backface_culling == nil then
+			full_copy.tiles[i].backface_culling = default_tile_changes[i].backface_culling
+		end
+		if default_tile_changes[i].scale and changes_copy.tiles[i].scale == nil then
+			full_copy.tiles[i].scale = default_tile_changes[i].scale
+		end
+	end
+	-- Handle default groups
+	for group, value in pairs(naturalslopeslib.default_definition.groups) do
+		if not def_changes.groups or def_changes.groups[group] == nil then
+			full_copy.groups[group] = value
+		end
+	end
+	-- Handle other values
+	for key, value in pairs(naturalslopeslib.default_definition) do
+		if key ~= "groups" and key ~= "drop_source" and key ~= "tiles" then
+			if changes_copy[key] == nil then
+				if type(value) == "table" then
+					full_copy[key] = table.copy(value)
+				else
+					full_copy[key] = value
+				end
+			end
 		end
 	end
 	-- Use a copy because tables are passed by reference. Otherwise the node

@@ -1,7 +1,8 @@
 -- Global namespace for functions
 naturalslopeslib = {
 	_register_on_generated = true,
-	_propagate_overrides = false
+	_propagate_overrides = false,
+	default_definition = {} -- initialized below
 }
 
 local poschangelib_available = false
@@ -13,6 +14,15 @@ for _, name in ipairs(minetest.get_modnames()) do
 		twmlib_available = true
 	end
 end
+
+function naturalslopeslib.reset_defaults()
+	naturalslopeslib.default_definition = {
+		drop_source = false,
+		tiles = {},
+		groups = {}
+	}
+end
+naturalslopeslib.reset_defaults()
 
 --- Get the name of the regular node from a slope, or nil.
 function naturalslopeslib.get_regular_node_name(node_name)
