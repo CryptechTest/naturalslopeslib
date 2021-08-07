@@ -233,7 +233,7 @@ end
 -- @return True if the node was updated, false otherwise.
 function naturalslopeslib.update_shape(pos, node)
 	local replacement = naturalslopeslib.get_replacement_node(pos, node)
-	if replacement then
+	if replacement and (replacement.name ~= node.name or node.param2 ~= replacement.param2) then
 		minetest.set_node(pos, replacement)
 		return true
 	else
