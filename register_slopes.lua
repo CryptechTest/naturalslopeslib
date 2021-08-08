@@ -341,14 +341,6 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 		minetest.log("error", "Trying to register slopes for an unknown node " .. (base_node_name or "nil"))
 		return
 	end
-	local full_copy = table.copy(base_node_def)
-	for key, value in pairs(def_changes) do
-		if value == "nil" then
-			full_copy[key] = nil
-		else
-			full_copy[key] = value
-		end
-	end
 	local chance_factors = default_factors(factors)
 	-- Get new definitions
 	local subname = string.sub(base_node_name, string.find(base_node_name, ':') + 1)
@@ -358,7 +350,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 		naturalslopeslib.get_outer_corner_slope_name(subname),
 		naturalslopeslib.get_pike_slope_name(subname)
 	}
-	local slope_defs = naturalslopeslib.get_slope_defs(base_node_name, full_copy)
+	local slope_defs = naturalslopeslib.get_slope_defs(base_node_name, def_changes)
 	-- Register all slopes
 	local stomp_factor = naturalslopeslib.setting_stomp_factor()
 	for i, name in ipairs(slope_names) do
