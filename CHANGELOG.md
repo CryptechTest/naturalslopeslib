@@ -3,6 +3,19 @@ Changelog
 
 The semantic of version number is 'Major.minor'. Minor updates are retro-compatible, while major updates may break things.
 
+[1.3] - 2021-08-08
+------------------
+
+### Added
+- `naturalslopeslib.default_definition` and `naturalslopeslib.reset_defaults` to factorize common definition.
+- `color_convert` function as parameter to slope definitions to convert color values between 256 and 8 values.
+
+### Fixed
+- `naturalslopeslib.chance_update_shape` and `naturalslopeslib.update_shape` return true only when the node actually changed.
+- Keeping color value when switching shape.
+- Removing properties with "nil" with `naturalslopeslib.register_slopes`.
+
+
 [1.2] - 2021-02-23
 ------------------
 
