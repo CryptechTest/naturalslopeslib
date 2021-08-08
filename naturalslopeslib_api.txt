@@ -128,7 +128,7 @@ Good practices are setting the defaults before registering your slopes, then cal
 * Resets naturalslopeslib.default_definition to the less-impacting values.
 * These defaults are as follow {drop_source = false, tiles = {}, groups = {}}
 
-### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors)
+### naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors, color_convert)
 
 * Registers all slope shapes and automatic stomping for a full node.
 * `base_node_name` the full block node name.
@@ -143,9 +143,10 @@ Good practices are setting the defaults before registering your slopes, then cal
   * Then they are changed from def_changes. Use "nil" string to explicitely erase a value (an not nil).
 * `update_chance` inverted chance for the node to be updated.
 * `factors` optional table for chance factors. By default each factor is 1.
+* `color_convert` optional function to convert color palettes (see below). Ignored when paramtype2 from the base node is not "color". By default, it matches the first 8 values, and other color values are set to 0.
 * returns ReplacementTable.
 
-Warning: The palette for slopes can only have 8 colors while the original one can hold up to 256 colors. A reduced palette must be provided for nodes which paramtype2 is "color" even if not all colors are used.
+About color palettes: The palette for slopes can only have 8 colors while the original one can hold up to 256 colors. A reduced palette must be provided for nodes which paramtype2 is "color" even if not all colors are used. To control how the palette values are converted, you may pass a function(int, bool) as `color_convert`. When the second parameter is true, the first parameter is the full block color index (from 0 to 255) and it must return an index for the slope color (from 0 to 7). When false the first parameter is the slope color index (from 0 to 7) and it must return an index for the full block color index (from 0 to 255).
 
 ### naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors)
 

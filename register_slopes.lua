@@ -1,9 +1,29 @@
+-- Default color index conversion: match values for 0-7 and set to 0 for other values.
+local function default_color_convert(color_index, to_slope)
+	if to_slope then
+		if color_index > 7 then
+			return 0
+		else
+			return color_index
+		end
+	else
+		return color_index
+	end
+end
 
 -- Table of replacement from solid block to slopes.
 -- Populated on slope node registration with add_replacement
+-- @param colored_source (boolean) true when paramtype2 is color for the source node
+-- color_convert is a function(int, int, bool) to convert the color palette values,
+-- it is ignored when colored_source is false.
 local replacements = {}
 local replacement_ids = {}
-local function add_replacement(source_name, update_chance, chance_factors, fixed_replacements)
+local function add_replacement(source_name, update_chance, chance_factors, fixed_replacements, colored_source, color_to_slope, color_convert)
+	if not colored_source then
+		color_convert = nil
+	elseif color_convert == nil then
+		color_convert = default_color_convert
+	end
 	local subname = string.sub(source_name, string.find(source_name, ':') + 1)
 	local straight_name = nil
 	local ic_name = nil
@@ -33,7 +53,9 @@ local function add_replacement(source_name, update_chance, chance_factors, fixed
 		outer = oc_name,
 		pike = pike_name,
 		chance = update_chance,
-		chance_factors = chance_factors
+		chance_factors = chance_factors,
+		_colored_source = colored_source,
+		_color_convert = color_convert
 	}
 	local dest_data_id = {
 		source = source_id,
@@ -42,7 +64,9 @@ local function add_replacement(source_name, update_chance, chance_factors, fixed
 		outer = oc_id,
 		pike = pike_id,
 		chance = update_chance,
-		chance_factors = chance_factors
+		chance_factors = chance_factors,
+		_colored_source = colored_source,
+		_color_convert = color_convert
 	}
 	-- Block
 	replacements[source_name] = dest_data
@@ -305,8 +329,9 @@ end
 -- @param node_desc: base for slope node descriptions.
 -- @param update_chance: inverted chance for the node to be updated.
 -- @param factors (optional): chance factor for each type.
+-- @param color_convert (optional): the function to convert color palettes
 -- @return Table of slope names: [straight, inner, outer, pike] or nil on error.
-function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors)
+function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors, color_convert)
 	if not update_chance then
 		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
@@ -347,7 +372,8 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 		end
 	end
 	-- Register replacements
-	add_replacement(base_node_name, update_chance, chance_factors, slope_names)
+	local colored = base_node_def.paramtype2 == "color"
+	add_replacement(base_node_name, update_chance, chance_factors, slope_names, colored, color_convert)
 	-- Enable on walk update for base node
 	if naturalslopeslib.setting_enable_shape_on_walk() then
 		poschangelib.register_stomp(base_node_name,
@@ -368,7 +394,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 end
 
 --- Add a slopping behaviour to existing nodes.
-function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors)
+function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors, color_convert)
 	-- Defensive checks
 	if not minetest.registered_nodes[base_node_name] then
 		if not base_node_name then
@@ -392,7 +418,8 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 	local chance_factors = default_factors(factors)
 	-- Set shape update data
 	local slope_names = {straight_name, inner_name, outer_name, pike_name}
-	add_replacement(base_node_name, update_chance, chance_factors, slope_names)
+	local colored = minetest.registered_nodes[base_node_name].paramtype2 == "color"
+	add_replacement(base_node_name, update_chance, chance_factors, slope_names, colored, color_convert)
 	-- Set surface update
 	if naturalslopeslib.setting_enable_surface_update() then
 		local time_factor = naturalslopeslib.setting_time_factor()

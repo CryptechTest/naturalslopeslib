@@ -6,18 +6,60 @@ Describes the falling/eroding effect for slopes
 Pick replacement, node and area
 --]]
 
---- {Private} Pick a replacement node and set it at pos.
+-- Manage color for param2
+-- @param replacement the replacement table
+-- @param source the name or id of the node being transformed
+-- @param dest the name or id of the new shape
+-- @param param2_source the param2 value before transformation
+-- @param param2_dest the param2 value for facedir (if any) after transformation
+-- @return a new param2 value for dest node with color if necessary
+local function manage_param2_color(replacement, source, dest, param2_source, param2_dest)
+	if not replacement._colored_source then
+		return param2_dest
+	end
+	if dest == replacement.source then
+		-- param2_source will hold a 'color' value
+		if source == replacement.source then
+			-- from 'color' to 'color'
+			return param2_source
+		else
+			-- from 'color' to 'colorfacedir'
+			local new_color_index = replacement._color_convert(param2_source, true) % 8
+			return param2_dest + (new_color_index * 32)
+		end
+	else
+		-- param2_source will hold a 'colorfacedir' value
+		if dest == replacement.source then
+			-- from 'colorfacedir' to 'color'
+			local old_color = math.floor(param2_source / 32)
+			return replacement._color_convert(old_color, false) % 256
+		else
+			-- from 'colorfacedir' to an other 'colorfacedir'
+			local color = math.floor(param2_source / 32)
+			return param2_dest + (color * 32)
+		end
+	end
+end
+
+--- {Private} Pick a replacement node.
 -- @param type The replacement shape. Either 'block', 'straight', 'ic' or 'oc'
--- @param name The name of the node to replace.
--- @param pos The position of the node to replace
--- @param param2 Optional value to orient the new node.
--- @return True if the node is replaced, false otherwise.
-local function pick_replacement(slope_type, name, pos, param2)
-	local replacement = naturalslopeslib.get_replacement(name)
+-- @param name The name (or id for area) of the node to replace.
+-- @param old_param2 The current value of param2 for the node to replace
+-- @param param2 Facedir value to orient the new node.
+-- @param for_area True when picking for an area, changes the parameter types
+-- @return node {name=new_name, param2=new_param2} or area data {id=new_id, param2_data=new_param2}
+-- or nil if dest node is not found.
+local function pick_replacement(slope_type, name, old_param2, param2, for_area)
+	local replacement
+	if for_area then
+		replacement = naturalslopeslib.get_replacement_id(name)
+	else
+		replacement = naturalslopeslib.get_replacement(name)
+	end
 	if not replacement then return nil end
 	local dest_node_name = nil
 	if slope_type == 'block' and replacement.source then
-		return {name=replacement.source}
+		dest_node_name = replacement.source
 	elseif slope_type == 'pike' and replacement.pike then
 		dest_node_name = replacement.pike
 	elseif slope_type == 'straight' and replacement.straight then
@@ -28,31 +70,13 @@ local function pick_replacement(slope_type, name, pos, param2)
 		dest_node_name = replacement.outer
 	end
 	if dest_node_name then
-		return {name = dest_node_name, paramtype2='facedir',
-			param2 = param2}
-	end
-	return nil
-end
-
-local function area_pick_replacement(slope_type, data, param2_data, id, index, param2)
-	local replacement = naturalslopeslib.get_replacement_id(id)
-	if not replacement then return false end
-	local dest_node_id = nil
-	local paramtype2 = nil
-	if slope_type == 'block' and replacement.source then
-		return {id = replacement.source}
-	elseif slope_type == 'pike' and replacement.pike then
-		dest_node_id = replacement.pike
-	elseif slope_type == 'straight' and replacement.straight then
-		dest_node_id = replacement.straight
-	elseif slope_type == 'ic' and replacement.inner then
-		dest_node_id = replacement.inner
-	elseif slope_type == 'oc' and replacement.outer then
-		dest_node_id = replacement.outer
-	end
-	if dest_node_id then
-		return {id = dest_node_id, paramtype2="facedir",
-			param2_data = param2}
+		if param2 == nil then param2 = 0 end
+		local color_param2 = manage_param2_color(replacement, name, dest_node_name, old_param2, param2)
+		if for_area then
+			return {id = dest_node_name, param2_data = color_param2}
+		else
+			return {name = dest_node_name, param2 = color_param2}
+		end
 	end
 	return nil
 end
@@ -98,7 +122,10 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 	local new_pos = nil
 	local replacement = nil
 	local node_name = nil -- Either name or id
+	local for_area = false
+	local old_param2 = 0
 	if area then
+		for_area = true
 		is_free = function (at_index) -- always use with new_pos
 			return naturalslopeslib.area_is_free_for_shape_update(area, data, at_index)
 		end
@@ -106,16 +133,13 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 			local area_pos = area:position(pos)
 			return area:indexp(vector.add(area_pos, add))
 		end
-		replacement = function(slope_type, name, pos, pointing)
-			return area_pick_replacement(slope_type,
-				data, param2_data, name, pos, pointing)
-		end
 		node_name = node
+		old_param2 = param2_data[pos]
 	else
 		is_free = naturalslopeslib.is_free_for_shape_update
 		new_pos = function(add) return vector.add(pos, add) end
-		replacement = pick_replacement
 		node_name = node.name
+		old_param2 = node.param2
 	end
 	local is_ground -- ground or ceiling node
 	local pointing_y = -1
@@ -132,7 +156,7 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 		is_ground = false
 		pointing_y = 5
 	else -- nothing below and above
-		return replacement("block", node_name, pos)
+		return pick_replacement("block", node_name, old_param2, 0, for_area)
 	end
 	-- Check blocks around
 	local airXP = is_free(new_pos({x=1, y=0, z=0}))
@@ -151,26 +175,26 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 	if free_neighbors == 4 or free_neighbors == 3 then
 		local param2 = 0
 		if is_ground == false then param2 = 20 end
-		return replacement("pike", node_name, pos, param2)
+		return pick_replacement("pike", node_name, old_param2, param2, for_area)
 	-- For two free neighbors
 	elseif free_neighbors == 2 then
 		-- at opposite sides, block
 		local param2
 		if (airXP and airXM) or (airZP and airZM) then
-			return replacement('block', node_name, pos)
+			return pick_replacement('block', node_name, old_param2, 0, for_area)
 		-- side by side, outer corner
 		elseif (airXP and airZP) then
 			if is_ground then param2 = 3 else param2 = 22 end
-			return replacement("oc", node_name, pos, param2)
+			return pick_replacement("oc", node_name, old_param2, param2, for_area)
 		elseif (airXP and airZM) then
 			if is_ground then param2 = 0 else param2 = 21 end
-			return replacement("oc", node_name, pos, param2)
+			return pick_replacement("oc", node_name, old_param2, param2, for_area)
 		elseif (airXM and airZP) then
 			if is_ground then param2 = 2 else param2 = 23 end
-			return replacement("oc", node_name, pos, param2)
+			return pick_replacement("oc", node_name, old_param2, param2, for_area)
 		elseif (airXM and airZM) then
 			if is_ground then param2 = 1 else param2 = 20 end
-			return replacement("oc", node_name, pos, param2)
+			return pick_replacement("oc", node_name, old_param2, param2, for_area)
 		end
 	-- For one free neighbor, straight slope
 	elseif free_neighbors == 1 then
@@ -180,7 +204,7 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 		elseif airZP then if is_ground then param2 = 2 else param2 = 6 end
 		elseif airZM then if is_ground then param2 = 0 else param2 = 8 end
 		end
-		return replacement("straight", node_name, pos, param2)
+		return pick_replacement("straight", node_name, old_param2, param2, for_area)
 	-- For no free neighbor check for a free diagonal for an inner corner
 	-- or fully surrounded for a rebuild
 	else
@@ -191,18 +215,18 @@ function naturalslopeslib.get_replacement_node(pos, node, area, data, param2_dat
 		local param2
 		if airXPZP and not airXPZM and not airXMZP and not airXMZM then
 			if is_ground then param2 = 3 else param2 = 15 end
-			return replacement("ic", node_name, pos, param2)
+			return pick_replacement("ic", node_name, old_param2, param2, for_area)
 		elseif not airXPZP and airXPZM and not airXMZP and not airXMZM then
 			if is_ground then param2 = 0 else param2 = 8 end
-			return replacement("ic", node_name, pos, param2)
+			return pick_replacement("ic", node_name, old_param2, param2, for_area)
 		elseif not airXPZP and not airXPZM and airXMZP and not airXMZM then
 			if is_ground then param2 = 2 else param2 = 23 end
-			return replacement("ic", node_name, pos, param2)
+			return pick_replacement("ic", node_name, old_param2, param2, for_area)
 		elseif not airXPZP and not airXPZM and not airXMZP and airXMZM then
 			if is_ground then param2 = 1 else param2 = 17 end
-			return replacement("ic", node_name, pos, param2)
+			return pick_replacement("ic", node_name, old_param2, param2, for_area)
 		else
-			return replacement('block', node_name, pos)
+			return pick_replacement('block', node_name, old_param2, 0, for_area)
 		end
 	end
 end
