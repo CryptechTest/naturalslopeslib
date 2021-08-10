@@ -26,8 +26,8 @@ have any effect by itself.
 
 ## Optional dependencies:
 
-* poschangelib: to enable shape update when walking on nodes
-* twmlib: to enable update from time to time
+* `poschangelib`: to enable shape update when walking on nodes
+* `twmlib`: to enable update from time to time
 
 ## Source code
 
