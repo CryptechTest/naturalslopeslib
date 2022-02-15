@@ -16,6 +16,7 @@ end
 -- @param colored_source (boolean) true when paramtype2 is color for the source node
 -- color_convert is a function(int, int, bool) to convert the color palette values,
 -- it is ignored when colored_source is false.
+local source_list = {}
 local replacements = {}
 local replacement_ids = {}
 local function add_replacement(source_name, update_chance, chance_factors, fixed_replacements, colored_source, color_to_slope, color_convert)
@@ -68,6 +69,7 @@ local function add_replacement(source_name, update_chance, chance_factors, fixed
 		_colored_source = colored_source,
 		_color_convert = color_convert
 	}
+	table.insert(source_list, source_name)
 	-- Block
 	replacements[source_name] = dest_data
 	replacement_ids[source_id] = dest_data_id
@@ -83,6 +85,11 @@ local function add_replacement(source_name, update_chance, chance_factors, fixed
 	-- Pike
 	replacements[pike_name] = dest_data
 	replacement_ids[pike_id] = dest_data_id
+end
+
+--- Get the list of nodes in block shape that have slopes registered for.
+function naturalslopeslib.list_registered_nodes()
+	return table.copy(source_list)
 end
 
 --- Get replacement description of a node.
@@ -367,7 +374,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	local colored = base_node_def.paramtype2 == "color"
 	add_replacement(base_node_name, update_chance, chance_factors, slope_names, colored, color_convert)
 	-- Enable on walk update for base node
-	if naturalslopeslib.setting_enable_shape_on_walk() then
+	if naturalslopeslib.setting_enable_shape_on_walk() and not naturalslopeslib.setting_revert() then
 		poschangelib.register_stomp(base_node_name,
 			naturalslopeslib.update_shape_on_walk,
 			{name = base_node_name .. '_upd_shape',
@@ -375,11 +382,23 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	end
 	-- Enable surface update
 	local time_factor = naturalslopeslib.setting_time_factor()
-	if naturalslopeslib.setting_enable_surface_update() then
+	if naturalslopeslib.setting_enable_surface_update() and not naturalslopeslib.setting_revert() then
 		twmlib.register_twm({
 			nodenames = {base_node_name, slope_defs[1], slope_defs[2], slope_defs[3], slope_defs[4]},
 			chance = update_chance * chance_factors.time * time_factor,
 			action = naturalslopeslib.update_shape
+		})
+	end
+	-- Enable revert LBM
+	if naturalslopeslib.setting_revert() then
+		minetest.register_lbm({
+			label = 'naturalslopes_revert',
+			name = minetest.get_current_modname() .. ':revert_slopes_' .. string.gsub(base_node_name, ':', '_'),
+			nodenames = slope_names,
+			run_at_every_load = true,
+			action = function (pos, node)
+				minetest.swap_node(pos, { name = base_node_name })
+			end
 		})
 	end
 	return naturalslopeslib.get_replacement(base_node_name)
@@ -413,7 +432,7 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 	local colored = minetest.registered_nodes[base_node_name].paramtype2 == "color"
 	add_replacement(base_node_name, update_chance, chance_factors, slope_names, colored, color_convert)
 	-- Set surface update
-	if naturalslopeslib.setting_enable_surface_update() then
+	if naturalslopeslib.setting_enable_surface_update() and not naturalslopeslib.setting_revert() then
 		local time_factor = naturalslopeslib.setting_time_factor()
 		twmlib.register_twm({
 			nodenames = {base_node_name, straight_name, inner_name, outer_name, pike_name},
@@ -422,7 +441,7 @@ function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, 
 		})
 	end
 	-- Set walk listener for the 5 nodes
-	if naturalslopeslib.setting_enable_shape_on_walk() then
+	if naturalslopeslib.setting_enable_shape_on_walk() and not naturalslopeslib.setting_revert() then
 		local stomp_factor = naturalslopeslib.setting_stomp_factor()
 		local stomp_desc = {name = base_node_name .. '_upd_shape',
 			chance = update_chance * chance_factors.stomp * stomp_factor, priority = 500}

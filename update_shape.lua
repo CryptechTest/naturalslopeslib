@@ -539,7 +539,9 @@ local function register_on_generation()
 		end
 	end
 end
-minetest.register_on_mods_loaded(register_on_generation)
+if not naturalslopeslib.setting_revert() then
+	minetest.register_on_mods_loaded(register_on_generation)
+end
 
 --- On place neighbor update
 local function on_place_or_dig(pos, force_below)
@@ -564,7 +566,7 @@ local function on_place_or_dig(pos, force_below)
 	update(pos, 0, 1, 0, place_factor)
 end
 
-if naturalslopeslib.setting_enable_shape_on_dig_place() then
+if naturalslopeslib.setting_enable_shape_on_dig_place() and not naturalslopeslib.setting_revert() then
 	minetest.register_on_placenode(function(pos, new_node, placer, old_node, item_stack, pointed_thing)
 		on_place_or_dig(pos, true)
 	end)

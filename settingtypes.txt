@@ -46,6 +46,12 @@ naturalslopeslib_update_shape_generate_skip (Generation skip nodes) int 0 0
 # Enable or disable shape update of neighbor nodes when one is placed or updated.
 naturalslopeslib_enable_shape_on_dig_place (Shape update on dig and place) bool true
 
+## Revert changes
+
+# Prevent new updates and revert slopes to their original block shape when they are loaded.
+# Activate this function if you would like to deactivate natural slopes in existing worlds, but leave all the slopes mods loaded to prevent unknown nodes to appearing until all revert is done.
+# Revert cannot be undone once blocks are loaded.
+naturalslopeslib_revert (Revert) bool false
 
 ## Rendering
 

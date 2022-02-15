@@ -19,6 +19,7 @@ Table of contents
 ---- naturalslopeslib.get_replacement
 ---- naturalslopeslib.get_replacement_id
 ---- naturalslopeslib.get_all_shapes
+---- naturalslopeslib.list_registered_slopes
 -- Shape update API
 ---- naturalslopeslib.is_free_for_shape_update
 ---- naturalslopeslib.area_is_free_for_shape_update
@@ -228,6 +229,10 @@ Warning: The palette for slopes can only have 8 colors while the original one ca
 Returns the node and all it's slope names in a table {source, straight, inner corner, outer corner, pike}. Returns {source} if there are no slopes for this node.
 
 * `source_node_name` The full block node name.
+
+### naturalslopeslib.list_registered_nodes()
+
+Returns the list of nodes in block shape that have slopes registered for.
 
 
 Shape update API

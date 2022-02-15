@@ -96,6 +96,11 @@ function naturalslopeslib.setting_enable_shape_on_dig_place()
 	if value == nil then value = true end
 	return value
 end
+function naturalslopeslib.setting_revert()
+	local value = minetest.settings:get_bool('naturalslopeslib_revert')
+	if value == nil then value = false end
+	return value
+end
 function naturalslopeslib.setting_smooth_rendering()
 	local value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
 	if value == nil then value = false end
