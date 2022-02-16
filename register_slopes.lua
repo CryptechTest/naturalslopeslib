@@ -114,6 +114,15 @@ function naturalslopeslib.get_all_shapes(source_node_name)
 	end
 end
 
+function naturalslopeslib.get_all_slopes(source_node_name)
+	if replacements[source_node_name] then
+		local rp = replacements[source_node_name]
+		return {rp.straight, rp.inner, rp.outer, rp.pike}
+	else
+		return {}
+	end
+end
+
 --[[ Bounding boxes
 --]]
 

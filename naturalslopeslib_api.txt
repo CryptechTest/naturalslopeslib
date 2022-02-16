@@ -226,9 +226,15 @@ Warning: The palette for slopes can only have 8 colors while the original one ca
 
 ### naturalslopeslib.get_all_shapes(source_node_name)
 
-Returns the node and all it's slope names in a table {source, straight, inner corner, outer corner, pike}. Returns {source} if there are no slopes for this node.
+Returns all variant shape names in a table {block, straight slope, inner corner, outer corner, pike}. Returns {source_node_name} if there are no other shapes for this node.
 
-* `source_node_name` The full block node name.
+* `source_node_name` a node name, can be a full block or a slope.
+
+### naturalslopeslib.get_all_slopes(source_node_name)
+
+Returns all sloped variant shape names in a table {straight slope, inner corner, outer corner, pike}. Returns {} if there are no slopes for this node.
+
+* `source_node_name` a node name, can be a full block or a slope.
 
 ### naturalslopeslib.list_registered_nodes()
 
