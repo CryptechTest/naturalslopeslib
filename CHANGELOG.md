@@ -3,6 +3,17 @@ Changelog
 
 The semantic of version number is 'Major.minor'. Minor updates are retro-compatible, while major updates may break things.
 
+[1.4] - 2022-02-20
+------------------
+
+### Added
+- `naturalslopeslib.get_all_slopes` to list all shapes except the full block one.
+
+### Fixed
+- Documentation about `naturalslopeslib.get_all_shapes` that can be called from any shape.
+- Warning about mod.conf name entry.
+
+
 [1.3] - 2021-08-08
 ------------------
 

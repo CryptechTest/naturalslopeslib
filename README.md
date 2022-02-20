@@ -1,7 +1,7 @@
 Natural slopes library
 ======================
 
-* Version 1.3
+* Version 1.4
 * With thanks to all modders, mainly from the stairs mod for study.
 
 This mod add the ability for nodes to turn into slopes and back to full block
