@@ -101,9 +101,23 @@ function naturalslopeslib.setting_revert()
 	if value == nil then value = false end
 	return value
 end
+--- @deprecated, use naturalslopeslib.setting_rendering_mode()
 function naturalslopeslib.setting_smooth_rendering()
-	local value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
-	if value == nil then value = false end
+	local mode = naturalslopeslib.setting_rendering_mode()
+	return (mode == 'Smooth' or mode == 'Rough')
+end
+function naturalslopeslib.setting_rendering_mode()
+	local value = minetest.settings:get('naturalslopeslib_rendering_mode')
+	if value == nil then
+		-- Backward compatibility, load from naturalslopeslib_smooth_rendering
+		value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
+		if value == true then
+			value = 'Smooth'
+		else
+			value = 'Cubic'
+		end
+	end
+	if value == nil then value = 'Cubic' end
 	return value
 end
 

@@ -55,6 +55,9 @@ naturalslopeslib_revert (Revert) bool false
 
 ## Rendering
 
-# Enable smooth rendering instead of cubic. It will show some disconnections at some
-# points that won't be fixed and may be visually misleading with heights.
-naturalslopeslib_smooth_rendering (Smooth but glitched rendering) bool false
+# Rendering mode for slopes. It only affects the visuals. The collision boxes are always matching the cubic style.
+# Anything different from Cubic will shows sharp discontinuities between slopes and non-sloped nodes, and will mislead players because the bottom part of a slope is in fact half a node higher than it looks like.
+# - Cubic (default) divides blocs in 8 and give stair-like look
+# - Smooth uses smooth triangles.
+# - Rough shows more accidented slopes.
+naturalslopeslib_rendering_mode (Rendering mode) enum Cubic Cubic,Smooth,Rough

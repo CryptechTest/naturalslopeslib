@@ -42,7 +42,7 @@ Table of contents
 ---- naturalslopeslib.setting_time_factor
 ---- naturalslopeslib.setting_generation_skip
 ---- naturalslopeslib.setting_enable_shape_on_dig_place
----- naturalslopeslib.setting_smooth_rendering
+---- naturalslopeslib.setting_rendering_mode
 -- Chat commands
 ---- updshape
 
@@ -381,9 +381,10 @@ These functions get the current settings with the default value if not set.
 
 * Returns `true` or `false`. This setting is read only on startup and may not reflect the actual value if it was changed while the server is running.
 
-### naturalslopeslib.setting_smooth_rendering()
+### naturalslopeslib.setting_rendering_mode()
 
-* Returns `true` or `false`. This setting is read only when registering nodes and may not reflect the actual value if it was changed while the server is running.
+* Returns `Cubic`, `Smooth` or `Rough`. This setting is read only when registering nodes and may not reflect the actual value if it was changed while the server is running.
+* Was previously `naturalslopeslib.setting_smooth_rendering`, that is now deprecated but still available and returns `true` for `Smooth` and `Rough` modes.
 
 
 Chat commands

@@ -173,9 +173,13 @@ end
 --- {Private} Update the node definition for a straight slope
 local function get_straight_def(base_node_name, node_def)
 	node_def = apply_default_slope_def(base_node_name, node_def, 1)
-	if naturalslopeslib.setting_smooth_rendering() then
+	local rendering = naturalslopeslib.setting_rendering_mode()
+	if rendering == 'Smooth' then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_straight.obj'
+	elseif rendering == 'Rough' then
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_straight_rough.obj'
 	else
 		node_def.drawtype = 'nodebox'
 		node_def.node_box = slope_straight_box
@@ -188,9 +192,13 @@ end
 --- {Private} Update the node definition for an inner corner
 local function get_inner_def(base_node_name, node_def)
 	node_def = apply_default_slope_def(base_node_name, node_def, 2)
-	if naturalslopeslib.setting_smooth_rendering() then
+	local rendering = naturalslopeslib.setting_rendering_mode()
+	if rendering == 'Smooth' then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_inner.obj'
+	elseif rendering == 'Rough' then
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_inner_rough.obj'
 	else
 		node_def.drawtype = 'nodebox'
 		node_def.node_box = slope_inner_corner_box
@@ -203,9 +211,13 @@ end
 --- {Private} Update the node definition for an outer corner
 local function get_outer_def(base_node_name, node_def)
 	node_def = apply_default_slope_def(base_node_name, node_def, 3)
-	if naturalslopeslib.setting_smooth_rendering() then
+	local rendering = naturalslopeslib.setting_rendering_mode()
+	if rendering == 'Smooth' then
 		node_def.drawtype = 'mesh'
 		node_def.mesh = 'naturalslopeslib_outer.obj'
+	elseif rendering == 'Rough' then
+		node_def.drawtype = 'mesh'
+		node_def.mesh = 'naturalslopeslib_outer_rough.obj'
 	else
 		node_def.drawtype = 'nodebox'
 		node_def.node_box = slope_outer_corner_box
