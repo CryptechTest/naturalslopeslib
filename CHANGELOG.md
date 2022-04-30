@@ -3,11 +3,24 @@ Changelog
 
 The semantic of version number is 'Major.minor'. Minor updates are retro-compatible, while major updates may break things.
 
+[1.5] - 2022-03-28
+------------------
+
+### Added
+- DanRPI added rough slopes 3D models.
+- Rough slopes rendering mode, `naturalslopes.setting_rendering_mode` to get selected rendering mode (cubic, smooth or rough).
+
+### Changed
+- `naturalslopes.setting_smooth_rendering` is deprecated in favor of `naturalslopeslib.setting_rendering_mode` (see API documentation).
+- Settingtype moved from boolean `naturalslopes_smooth_rendering` to enum `naturalslopes_rendering_mode`.
+
+
 [1.4] - 2022-02-20
 ------------------
 
 ### Added
 - `naturalslopeslib.get_all_slopes` to list all shapes except the full block one.
+- `Revert` setting to prevent new slopes being generated and turn slopes into full blocks on loading.
 
 ### Fixed
 - Documentation about `naturalslopeslib.get_all_shapes` that can be called from any shape.
