@@ -7,7 +7,7 @@ naturalslopeslib = {
 
 local poschangelib_available = false
 local twmlib_available = false
-for _, name in ipairs(minetest.get_modnames()) do
+for _, name in ipairs(core.get_modnames()) do
 	if name == "poschangelib" then
 		poschangelib_available = true
 	elseif name == "twmlib" then
@@ -31,7 +31,7 @@ function naturalslopeslib.get_regular_node_name(node_name)
 	end
 	for _, regex in ipairs({"^(.-:)slope_inner_(.*)$", "^(.-:)slope_outer_(.*)$", "^(.-:)slope_pike_(.*)$", "^(.-:)slope_(.*)$"}) do
 		local match, match2 = string.match(node_name, regex)
-		if match and minetest.registered_nodes[match .. match2] ~= nil then
+		if match and core.registered_nodes[match .. match2] ~= nil then
 			return match .. match2
 		end
 	end
@@ -41,63 +41,63 @@ end
 -- For example 'dirt' will be named 'naturalslopeslib:slope_dirt'
 -- See naturalslopeslib.get_all_shapes to get the actual node names.
 function naturalslopeslib.get_straight_slope_name(subname)
-	return minetest.get_current_modname() .. ':slope_' .. subname
+	return core.get_current_modname() .. ':slope_' .. subname
 end
 function naturalslopeslib.get_inner_corner_slope_name(subname)
-	return minetest.get_current_modname() .. ':slope_inner_' .. subname
+	return core.get_current_modname() .. ':slope_inner_' .. subname
 end
 function naturalslopeslib.get_outer_corner_slope_name(subname)
-	return minetest.get_current_modname() .. ':slope_outer_' .. subname
+	return core.get_current_modname() .. ':slope_outer_' .. subname
 end
 function naturalslopeslib.get_pike_slope_name(subname)
-	return minetest.get_current_modname() .. ':slope_pike_' .. subname
+	return core.get_current_modname() .. ':slope_pike_' .. subname
 end
 
 -- Set functions to get configuration and default values
 function naturalslopeslib.setting_enable_surface_update()
 	if not twmlib_available then return false end
-	local value = minetest.settings:get_bool('naturalslopeslib_enable_surface_update')
+	local value = core.settings:get_bool('naturalslopeslib_enable_surface_update')
 	if value == nil then return true end
 	return value
 end
 function naturalslopeslib.setting_enable_shape_on_walk()
 	if not poschangelib_available then return false end
-	local value = minetest.settings:get_bool('naturalslopeslib_enable_shape_on_walk')
+	local value = core.settings:get_bool('naturalslopeslib_enable_shape_on_walk')
 	if value == nil then return true end
 	return value
 end
 function naturalslopeslib.setting_enable_shape_on_generation()
-	local value = minetest.settings:get_bool('naturalslopeslib_register_default_slopes')
+	local value = core.settings:get_bool('naturalslopeslib_register_default_slopes')
 	if value == nil then value = true end
 	return value
 end
 function naturalslopeslib.setting_generation_method()
-	local value = minetest.settings:get('naturalslopeslib_generation_method')
+	local value = core.settings:get('naturalslopeslib_generation_method')
 	if value == nil then value = 'VoxelManip' end
 	return value
 end
 function naturalslopeslib.setting_generation_factor()
-	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_factor')) or 0.05
+	return tonumber(core.settings:get('naturalslopeslib_update_shape_generate_factor')) or 0.05
 end
 function naturalslopeslib.setting_stomp_factor()
-	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_stomp_factor')) or 1.0
+	return tonumber(core.settings:get('naturalslopeslib_update_shape_stomp_factor')) or 1.0
 end
 function naturalslopeslib.setting_dig_place_factor()
-	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_dig_place_factor')) or 1.0
+	return tonumber(core.settings:get('naturalslopeslib_update_shape_dig_place_factor')) or 1.0
 end
 function naturalslopeslib.setting_time_factor()
-	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_time_factor')) or 1.0
+	return tonumber(core.settings:get('naturalslopeslib_update_shape_time_factor')) or 1.0
 end
 function naturalslopeslib.setting_generation_skip()
-	return tonumber(minetest.settings:get('naturalslopeslib_update_shape_generate_skip')) or 0
+	return tonumber(core.settings:get('naturalslopeslib_update_shape_generate_skip')) or 0
 end
 function naturalslopeslib.setting_enable_shape_on_dig_place()
-	local value = minetest.settings:get_bool('naturalslopeslib_enable_shape_on_dig_place')
+	local value = core.settings:get_bool('naturalslopeslib_enable_shape_on_dig_place')
 	if value == nil then value = true end
 	return value
 end
 function naturalslopeslib.setting_revert()
-	local value = minetest.settings:get_bool('naturalslopeslib_revert')
+	local value = core.settings:get_bool('naturalslopeslib_revert')
 	if value == nil then value = false end
 	return value
 end
@@ -107,10 +107,10 @@ function naturalslopeslib.setting_smooth_rendering()
 	return (mode == 'Smooth' or mode == 'Rough')
 end
 function naturalslopeslib.setting_rendering_mode()
-	local value = minetest.settings:get('naturalslopeslib_rendering_mode')
+	local value = core.settings:get('naturalslopeslib_rendering_mode')
 	if value == nil then
 		-- Backward compatibility, load from naturalslopeslib_smooth_rendering
-		value = minetest.settings:get_bool('naturalslopeslib_smooth_rendering')
+		value = core.settings:get_bool('naturalslopeslib_smooth_rendering')
 		if value == true then
 			value = 'Smooth'
 		else
@@ -130,8 +130,8 @@ function naturalslopeslib.propagate_overrides()
 		return
 	end
 	naturalslopeslib._propagate_overrides = true
-	local old_override = minetest.override_item
-	minetest.override_item = function(name, redefinition)
+	local old_override = core.override_item
+	core.override_item = function(name, redefinition)
 		local shapes = naturalslopeslib.get_all_shapes(name)
 		if #shapes == 1 then
 			old_override(name, redefinition)
@@ -159,7 +159,7 @@ function naturalslopeslib.propagate_overrides()
 	end
 end
 
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/update_shape.lua")
+dofile(core.get_modpath(core.get_current_modname()) .. "/update_shape.lua")
 -- Include registration methods
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/register_slopes.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/sloped_stomp.lua")
+dofile(core.get_modpath(core.get_current_modname()) .. "/register_slopes.lua")
+dofile(core.get_modpath(core.get_current_modname()) .. "/sloped_stomp.lua")
