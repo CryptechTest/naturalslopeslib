@@ -41,11 +41,11 @@ local function add_replacement(source_name, update_chance, chance_factors, fixed
 		oc_name = naturalslopeslib.get_outer_corner_slope_name(subname)
 		pike_name = naturalslopeslib.get_pike_slope_name(subname)
 	end
-	local source_id = minetest.get_content_id(source_name)
-	local straight_id = minetest.get_content_id(straight_name)
-	local ic_id = minetest.get_content_id(ic_name)
-	local oc_id = minetest.get_content_id(oc_name)
-	local pike_id = minetest.get_content_id(pike_name)
+	local source_id = core.get_content_id(source_name)
+	local straight_id = core.get_content_id(straight_name)
+	local ic_id = core.get_content_id(ic_name)
+	local oc_id = core.get_content_id(oc_name)
+	local pike_id = core.get_content_id(pike_name)
 	-- Full to slopes
 	local dest_data = {
 		source = source_name,
@@ -254,9 +254,9 @@ local function convert_to_expanded_tiles_def(tiles)
 end
 
 function naturalslopeslib.get_slope_defs(base_node_name, def_changes)
-	local base_node_def = minetest.registered_nodes[base_node_name]
+	local base_node_def = core.registered_nodes[base_node_name]
 	if not base_node_def then
-		minetest.log("error", "Trying to get slopes for an unknown node " .. (base_node_name or "nil"))
+		core.log("error", "Trying to get slopes for an unknown node " .. (base_node_name or "nil"))
 		return
 	end
 	local full_copy = table.copy(base_node_def)
@@ -361,12 +361,12 @@ end
 -- @return Table of slope names: [straight, inner, outer, pike] or nil on error.
 function naturalslopeslib.register_slope(base_node_name, def_changes, update_chance, factors, color_convert)
 	if not update_chance then
-		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
+		core.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
 	end
-	local base_node_def = minetest.registered_nodes[base_node_name]
+	local base_node_def = core.registered_nodes[base_node_name]
 	if not base_node_def then
-		minetest.log("error", "Trying to register slopes for an unknown node " .. (base_node_name or "nil"))
+		core.log("error", "Trying to register slopes for an unknown node " .. (base_node_name or "nil"))
 		return
 	end
 	local chance_factors = default_factors(factors)
@@ -382,7 +382,7 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	-- Register all slopes
 	local stomp_factor = naturalslopeslib.setting_stomp_factor()
 	for i, name in ipairs(slope_names) do
-		minetest.register_node(name, slope_defs[i])
+		core.register_node(name, slope_defs[i])
 		-- Register walk listener
 		if naturalslopeslib.setting_enable_shape_on_walk() then
 			poschangelib.register_stomp(name,
@@ -412,13 +412,13 @@ function naturalslopeslib.register_slope(base_node_name, def_changes, update_cha
 	end
 	-- Enable revert LBM
 	if naturalslopeslib.setting_revert() then
-		minetest.register_lbm({
+		core.register_lbm({
 			label = 'naturalslopes_revert',
-			name = minetest.get_current_modname() .. ':revert_slopes_' .. string.gsub(base_node_name, ':', '_'),
+			name = core.get_current_modname() .. ':revert_slopes_' .. string.gsub(base_node_name, ':', '_'),
 			nodenames = slope_names,
 			run_at_every_load = true,
 			action = function (pos, node)
-				minetest.swap_node(pos, { name = base_node_name })
+				core.swap_node(pos, { name = base_node_name })
 			end
 		})
 	end
@@ -428,29 +428,29 @@ end
 --- Add a slopping behaviour to existing nodes.
 function naturalslopeslib.set_slopes(base_node_name, straight_name, inner_name, outer_name, pike_name, update_chance, factors, color_convert)
 	-- Defensive checks
-	if not minetest.registered_nodes[base_node_name] then
+	if not core.registered_nodes[base_node_name] then
 		if not base_node_name then
-			minetest.log('error', 'naturalslopeslib.set_slopes failed: base node_name is nil.')
+			core.log('error', 'naturalslopeslib.set_slopes failed: base node_name is nil.')
 		else
-			minetest.log('error', 'naturalslopeslib.set_slopes failed: ' .. base_node_name .. ' is not registered.')
+			core.log('error', 'naturalslopeslib.set_slopes failed: ' .. base_node_name .. ' is not registered.')
 		end
 		return
 	end
-	if not minetest.registered_nodes[straight_name]
-	or not minetest.registered_nodes[inner_name]
-	or not minetest.registered_nodes[outer_name]
-	or not minetest.registered_nodes[pike_name] then
-		minetest.log('error', 'naturalslopeslib.set_slopes failed: one of the slopes for ' .. base_node_name .. ' is not registered.')
+	if not core.registered_nodes[straight_name]
+	or not core.registered_nodes[inner_name]
+	or not core.registered_nodes[outer_name]
+	or not core.registered_nodes[pike_name] then
+		core.log('error', 'naturalslopeslib.set_slopes failed: one of the slopes for ' .. base_node_name .. ' is not registered.')
 		return
 	end
 	if not update_chance then
-		minetest.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
+		core.log('error', 'Natural slopes: chance is not set for node ' .. base_node_name)
 		return
 	end
 	local chance_factors = default_factors(factors)
 	-- Set shape update data
 	local slope_names = {straight_name, inner_name, outer_name, pike_name}
-	local colored = minetest.registered_nodes[base_node_name].paramtype2 == "color"
+	local colored = core.registered_nodes[base_node_name].paramtype2 == "color"
 	add_replacement(base_node_name, update_chance, chance_factors, slope_names, colored, color_convert)
 	-- Set surface update
 	if naturalslopeslib.setting_enable_surface_update() and not naturalslopeslib.setting_revert() then

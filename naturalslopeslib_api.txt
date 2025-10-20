@@ -67,7 +67,7 @@ For the first method, just call naturalslopeslib.register_slopes. For example:
 
 You can use `naturalslopeslib.get_all_shapes` to get the name of the slope nodes.
 
-For the second method, get the slope definitions from naturalslopeslib.get_slope_defs and register the four nodes manually with the desired names with minetest.register_node. When done, call naturalslopeslib.set_slopes to link all the different shapes.
+For the second method, get the slope definitions from naturalslopeslib.get_slope_defs and register the four nodes manually with the desired names with core.register_node. When done, call naturalslopeslib.set_slopes to link all the different shapes.
 
 For example:
 
@@ -77,13 +77,13 @@ For example:
 		"default:dirt_outer_corner", "default:dirt_pike"
 	}
 	for i, def in ipairs(slope_defs) do
-		minetest.register_node(slope_names[i], def)
+		core.register_node(slope_names[i], def)
 	end
 	naturalslopeslib.set_slopes("default:dirt",
 		slope_names[1], slope_names[2],
 		slope_names[3], slope_names[4], factors)
 
-Regarding dependencies, the slopes are defined by copying the current definition of the original node. This means that modifications applied to the original node after the slopes are registered are not applied to slopes. If you want the slopes to act like the original nodes no matter what happen to their definition, you can call naturalslopes.propagate_overrides() before or after registering slopes. That way all future call to minetest.override_item (even from other unknown mods) will also apply to slopes silently, removing the need to explicitely define mod requirements.
+Regarding dependencies, the slopes are defined by copying the current definition of the original node. This means that modifications applied to the original node after the slopes are registered are not applied to slopes. If you want the slopes to act like the original nodes no matter what happen to their definition, you can call naturalslopes.propagate_overrides() before or after registering slopes. That way all future call to core.override_item (even from other unknown mods) will also apply to slopes silently, removing the need to explicitely define mod requirements.
 
 
 Definitions
@@ -186,7 +186,7 @@ It requires `poschangelib`. If the mod is not activated, this function will do n
 
 ### naturalslopeslib.propagate_overrides()
 
-Once called, calling `minetest.override_item` from that point will also apply the modifications to the corresponding slopes. Once called, this behaviour cannot be disabled.
+Once called, calling `core.override_item` from that point will also apply the modifications to the corresponding slopes. Once called, this behaviour cannot be disabled.
 
 
 Getters
@@ -271,7 +271,7 @@ In both case, it returns the parameters to update the node or nil when no replac
 * For a single node
 	* `pos` the position of the node or index with VoxelArea.
 	* `node` the node at that position.
-	* returns a node for minetest.set_node.
+	* returns a node for core.set_node.
 * For a VoxelArea
 	* `index` (the `pos` argument) the index within the area.
 	* `content_id` (the `node` argument) the node at that position or content id with VoxelArea.
